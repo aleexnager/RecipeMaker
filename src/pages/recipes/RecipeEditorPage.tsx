@@ -140,74 +140,74 @@ export function RecipeEditorPage() {
   }
 
   if (isEditing && !existingRecipe && loadedFromExisting === false) {
-    return <div className="p-4 text-stone-500">Cargando…</div>
+    return <div className="p-4 text-stone-500 dark:text-stone-400">Cargando…</div>
   }
 
   return (
     <div className="p-4 pb-10">
       <header className="mb-4 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="text-stone-500" aria-label="Volver">
+        <button onClick={() => navigate(-1)} className="text-stone-500 dark:text-stone-400" aria-label="Volver">
           ←
         </button>
-        <h1 className="text-xl font-semibold text-stone-900">{isEditing ? 'Editar receta' : 'Nueva receta'}</h1>
+        <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100">{isEditing ? 'Editar receta' : 'Nueva receta'}</h1>
       </header>
 
       <div className="space-y-5">
         <label className="block text-sm">
-          <span className="mb-1 block text-stone-600">Nombre *</span>
+          <span className="mb-1 block text-stone-600 dark:text-stone-300">Nombre *</span>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
           />
         </label>
 
         <label className="block text-sm">
-          <span className="mb-1 block text-stone-600">Descripción</span>
+          <span className="mb-1 block text-stone-600 dark:text-stone-300">Descripción</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
           />
         </label>
 
         <div className="grid grid-cols-3 gap-3">
           <label className="text-sm">
-            <span className="mb-1 block text-stone-600">Raciones</span>
+            <span className="mb-1 block text-stone-600 dark:text-stone-300">Raciones</span>
             <input
               type="number"
               min={1}
               value={servings}
               onChange={(e) => setServings(Number(e.target.value) || 1)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
             />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block text-stone-600">Prep. (min)</span>
+            <span className="mb-1 block text-stone-600 dark:text-stone-300">Prep. (min)</span>
             <input
               type="number"
               min={0}
               value={prepTimeMinutes}
               onChange={(e) => setPrepTimeMinutes(Number(e.target.value) || 0)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
             />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block text-stone-600">Cocción (min)</span>
+            <span className="mb-1 block text-stone-600 dark:text-stone-300">Cocción (min)</span>
             <input
               type="number"
               min={0}
               value={cookTimeMinutes}
               onChange={(e) => setCookTimeMinutes(Number(e.target.value) || 0)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
             />
           </label>
         </div>
 
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-stone-700">Categorías</h2>
+          <h2 className="mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Categorías</h2>
           <div className="flex flex-wrap gap-2">
             {RECIPE_CATEGORIES.map((category) => (
               <button
@@ -216,8 +216,8 @@ export function RecipeEditorPage() {
                 onClick={() => toggleCategory(category)}
                 className={`rounded-full border px-3 py-1.5 text-sm ${
                   categories.includes(category)
-                    ? 'border-brand-600 bg-brand-50 text-brand-700'
-                    : 'border-stone-300 bg-white text-stone-600'
+                    ? 'border-brand-600 bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
+                    : 'border-stone-300 bg-white text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300'
                 }`}
               >
                 {category}
@@ -236,11 +236,11 @@ export function RecipeEditorPage() {
         />
 
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-stone-700">Pasos *</h2>
+          <h2 className="mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Pasos *</h2>
           <ol className="space-y-2">
             {steps.map((step, index) => (
               <li key={step.key} className="flex items-start gap-2">
-                <span className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-200 text-xs font-medium text-stone-600">
+                <span className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-200 text-xs font-medium text-stone-600 dark:bg-stone-800 dark:text-stone-300">
                   {index + 1}
                 </span>
                 <textarea
@@ -248,36 +248,36 @@ export function RecipeEditorPage() {
                   onChange={(e) => updateStep(step.key, e.target.value)}
                   rows={2}
                   placeholder="Describe este paso…"
-                  className="flex-1 rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+                  className="flex-1 rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
                 />
                 <div className="flex flex-col gap-1">
-                  <button type="button" onClick={() => moveStep(index, -1)} className="text-stone-400" aria-label="Subir">
+                  <button type="button" onClick={() => moveStep(index, -1)} className="text-stone-400 dark:text-stone-500" aria-label="Subir">
                     ↑
                   </button>
-                  <button type="button" onClick={() => moveStep(index, 1)} className="text-stone-400" aria-label="Bajar">
+                  <button type="button" onClick={() => moveStep(index, 1)} className="text-stone-400 dark:text-stone-500" aria-label="Bajar">
                     ↓
                   </button>
-                  <button type="button" onClick={() => removeStep(step.key)} className="text-stone-300 hover:text-red-500" aria-label="Eliminar">
+                  <button type="button" onClick={() => removeStep(step.key)} className="text-stone-300 hover:text-red-500 dark:text-stone-600 dark:hover:text-red-400" aria-label="Eliminar">
                     ✕
                   </button>
                 </div>
               </li>
             ))}
           </ol>
-          <button type="button" onClick={addStep} className="mt-2 text-sm font-medium text-brand-600">
+          <button type="button" onClick={addStep} className="mt-2 text-sm font-medium text-brand-600 dark:text-brand-400">
             + Añadir paso
           </button>
         </div>
 
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-stone-700">Utensilios necesarios</h2>
+          <h2 className="mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Utensilios necesarios</h2>
           <div className="space-y-3">
             {TOOL_CATEGORIES.map((category) => {
               const items = (tools ?? []).filter((t) => t.category === category)
               if (items.length === 0) return null
               return (
                 <div key={category}>
-                  <p className="mb-1 text-xs font-medium uppercase tracking-wide text-stone-400">{category}</p>
+                  <p className="mb-1 text-xs font-medium uppercase tracking-wide text-stone-400 dark:text-stone-500">{category}</p>
                   <div className="flex flex-wrap gap-2">
                     {items.map((tool) => (
                       <button
@@ -286,8 +286,8 @@ export function RecipeEditorPage() {
                         onClick={() => toggleTool(tool.id)}
                         className={`rounded-full border px-3 py-1.5 text-sm ${
                           toolIds.includes(tool.id)
-                            ? 'border-brand-600 bg-brand-50 text-brand-700'
-                            : 'border-stone-300 bg-white text-stone-600'
+                            ? 'border-brand-600 bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
+                            : 'border-stone-300 bg-white text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300'
                         }`}
                       >
                         {tool.name}
@@ -304,7 +304,7 @@ export function RecipeEditorPage() {
           type="button"
           disabled={!canSave}
           onClick={handleSave}
-          className="w-full rounded-xl bg-brand-600 py-3 font-medium text-white disabled:opacity-40"
+          className="w-full rounded-xl bg-brand-600 py-3 font-medium text-white disabled:opacity-40 dark:disabled:opacity-30"
         >
           {isEditing ? 'Guardar cambios' : 'Crear receta'}
         </button>
@@ -346,40 +346,40 @@ function IngredientsEditor({
 
   return (
     <div>
-      <h2 className="mb-2 text-sm font-semibold text-stone-700">Ingredientes *</h2>
+      <h2 className="mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Ingredientes *</h2>
 
       <ul className="mb-3 space-y-2">
         {rows.map((row, index) => {
           const ingredient = ingredientsById.get(row.ingredientId)
           return (
-            <li key={`${row.ingredientId}-${index}`} className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm">
-              <span className="flex-1 truncate text-sm text-stone-800">{ingredient?.name ?? '…'}</span>
+            <li key={`${row.ingredientId}-${index}`} className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm dark:bg-stone-900">
+              <span className="flex-1 truncate text-sm text-stone-800 dark:text-stone-200">{ingredient?.name ?? '…'}</span>
               <input
                 type="number"
                 min={0}
                 value={row.quantity}
                 onChange={(e) => onUpdateRow(index, { quantity: Number(e.target.value) || 0 })}
-                className="w-20 rounded-lg border border-stone-300 px-2 py-1.5 text-sm focus:border-brand-500 focus:outline-none"
+                className="w-20 rounded-lg border border-stone-300 px-2 py-1.5 text-sm focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
               />
               <select
                 value={row.unit}
                 onChange={(e) => onUpdateRow(index, { unit: e.target.value as Unit })}
-                className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm focus:border-brand-500 focus:outline-none"
+                className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
               >
                 <option value="g">g</option>
                 <option value="ml">ml</option>
                 <option value="unit">ud.</option>
               </select>
-              <label className="flex items-center gap-1 text-xs text-stone-500">
+              <label className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
                 <input
                   type="checkbox"
                   checked={row.optional}
                   onChange={(e) => onUpdateRow(index, { optional: e.target.checked })}
-                  className="h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500"
+                  className="h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500 dark:border-stone-600 dark:bg-stone-800"
                 />
                 Opc.
               </label>
-              <button type="button" onClick={() => onRemoveRow(index)} className="text-stone-300 hover:text-red-500">
+              <button type="button" onClick={() => onRemoveRow(index)} className="text-stone-300 hover:text-red-500 dark:text-stone-600 dark:hover:text-red-400">
                 ✕
               </button>
             </li>
@@ -393,10 +393,10 @@ function IngredientsEditor({
           placeholder="Buscar ingrediente para añadir…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+          className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
         />
         {filtered.length > 0 && (
-          <ul className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-stone-200 bg-white shadow-lg">
+          <ul className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-stone-200 bg-white shadow-lg dark:border-stone-700 dark:bg-stone-900">
             {filtered.map((ingredient) => (
               <li key={ingredient.id}>
                 <button
@@ -405,10 +405,10 @@ function IngredientsEditor({
                     onAdd(ingredient)
                     setSearch('')
                   }}
-                  className="block w-full px-3 py-2 text-left text-sm hover:bg-stone-50"
+                  className="block w-full px-3 py-2 text-left text-sm hover:bg-stone-50 dark:text-stone-200 dark:hover:bg-stone-800"
                 >
                   {ingredient.name}
-                  {ingredient.brand && <span className="ml-1 text-stone-400">· {ingredient.brand}</span>}
+                  {ingredient.brand && <span className="ml-1 text-stone-400 dark:text-stone-500">· {ingredient.brand}</span>}
                 </button>
               </li>
             ))}
@@ -419,7 +419,7 @@ function IngredientsEditor({
       <button
         type="button"
         onClick={() => setShowQuickCreate((v) => !v)}
-        className="mt-2 text-sm font-medium text-brand-600"
+        className="mt-2 text-sm font-medium text-brand-600 dark:text-brand-400"
       >
         {showQuickCreate ? 'Cancelar' : '+ Crear ingrediente nuevo'}
       </button>
@@ -449,23 +449,23 @@ function QuickCreateIngredient({ onCreate }: { onCreate: (ingredient: Ingredient
   }
 
   return (
-    <div className="mt-3 space-y-3 rounded-lg border border-stone-200 bg-stone-50 p-3">
+    <div className="mt-3 space-y-3 rounded-lg border border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800/50">
       <label className="block text-sm">
-        <span className="mb-1 block text-stone-600">Nombre *</span>
+        <span className="mb-1 block text-stone-600 dark:text-stone-300">Nombre *</span>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+          className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
         />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="text-sm">
-          <span className="mb-1 block text-stone-600">Categoría</span>
+          <span className="mb-1 block text-stone-600 dark:text-stone-300">Categoría</span>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as IngredientCategory)}
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
           >
             {INGREDIENT_CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -475,11 +475,11 @@ function QuickCreateIngredient({ onCreate }: { onCreate: (ingredient: Ingredient
           </select>
         </label>
         <label className="text-sm">
-          <span className="mb-1 block text-stone-600">Unidad</span>
+          <span className="mb-1 block text-stone-600 dark:text-stone-300">Unidad</span>
           <select
             value={defaultUnit}
             onChange={(e) => setDefaultUnit(e.target.value as Unit)}
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
           >
             <option value="g">Gramos</option>
             <option value="ml">Mililitros</option>

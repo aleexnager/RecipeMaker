@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
+import { ThemeToggle } from './ThemeToggle'
 
 const TABS = [
   { to: '/recipes', label: 'Recetas', icon: BookIcon },
@@ -9,17 +10,22 @@ const TABS = [
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col bg-stone-100">
+    <div className="mx-auto flex min-h-screen max-w-2xl flex-col bg-stone-100 dark:bg-stone-950">
+      <header className="flex items-center justify-between border-b border-stone-200 bg-white px-4 py-2.5 dark:border-stone-800 dark:bg-stone-900">
+        <span className="text-sm font-semibold text-stone-800 dark:text-stone-100">RecipeMaker</span>
+        <ThemeToggle />
+      </header>
+
       <main className="flex-1 pb-20">{children}</main>
 
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 mx-auto flex max-w-2xl border-t border-stone-200 bg-white/95 backdrop-blur">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 mx-auto flex max-w-2xl border-t border-stone-200 bg-white/95 backdrop-blur dark:border-stone-800 dark:bg-stone-900/95">
         {TABS.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
               `flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium ${
-                isActive ? 'text-brand-600' : 'text-stone-400'
+                isActive ? 'text-brand-600 dark:text-brand-400' : 'text-stone-400 dark:text-stone-500'
               }`
             }
           >

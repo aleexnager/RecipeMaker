@@ -18,7 +18,7 @@ function App() {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-stone-100 text-stone-400">
+      <div className="flex min-h-screen items-center justify-center bg-stone-100 text-stone-400 dark:bg-stone-950 dark:text-stone-500">
         Cargando…
       </div>
     )

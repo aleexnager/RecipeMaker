@@ -47,8 +47,8 @@ export function RecipeDetailPage() {
   if (!recipe) {
     return (
       <div className="p-4">
-        <p className="text-stone-500">Receta no encontrada.</p>
-        <Link to="/recipes" className="text-brand-600 underline">
+        <p className="text-stone-500 dark:text-stone-400">Receta no encontrada.</p>
+        <Link to="/recipes" className="text-brand-600 underline dark:text-brand-400">
           Volver a recetas
         </Link>
       </div>
@@ -64,49 +64,49 @@ export function RecipeDetailPage() {
   return (
     <div className="p-4">
       <header className="mb-4 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="text-stone-500" aria-label="Volver">
+        <button onClick={() => navigate(-1)} className="text-stone-500 dark:text-stone-400" aria-label="Volver">
           ←
         </button>
-        <h1 className="flex-1 text-xl font-semibold text-stone-900">{recipe.name}</h1>
-        <Link to={`/recipes/${recipe.id}/edit`} className="text-sm font-medium text-brand-600">
+        <h1 className="flex-1 text-xl font-semibold text-stone-900 dark:text-stone-100">{recipe.name}</h1>
+        <Link to={`/recipes/${recipe.id}/edit`} className="text-sm font-medium text-brand-600 dark:text-brand-400">
           Editar
         </Link>
       </header>
 
-      {recipe.description && <p className="mb-3 text-stone-600">{recipe.description}</p>}
+      {recipe.description && <p className="mb-3 text-stone-600 dark:text-stone-400">{recipe.description}</p>}
 
       <div className="mb-4 flex flex-wrap gap-2 text-sm">
-        <span className="rounded-full bg-stone-100 px-3 py-1 text-stone-600">
+        <span className="rounded-full bg-stone-100 px-3 py-1 text-stone-600 dark:bg-stone-800 dark:text-stone-300">
           ⏱ {totalTimeMinutes(recipe)} min ({recipe.prepTimeMinutes} prep + {recipe.cookTimeMinutes} cocción)
         </span>
         {match?.canMakeNow ? (
-          <span className="rounded-full bg-brand-100 px-3 py-1 font-medium text-brand-700">✓ Puedes hacerla ya</span>
+          <span className="rounded-full bg-brand-100 px-3 py-1 font-medium text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">✓ Puedes hacerla ya</span>
         ) : (
-          <span className="rounded-full bg-amber-100 px-3 py-1 font-medium text-amber-700">Faltan ingredientes o utensilios</span>
+          <span className="rounded-full bg-amber-100 px-3 py-1 font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">Faltan ingredientes o utensilios</span>
         )}
       </div>
 
       <section className="mb-5">
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="font-semibold text-stone-900">Ingredientes</h2>
+          <h2 className="font-semibold text-stone-900 dark:text-stone-100">Ingredientes</h2>
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-stone-500">Raciones</span>
+            <span className="text-stone-500 dark:text-stone-400">Raciones</span>
             <button
               onClick={() => setServingsOverride(Math.max(1, effectiveServings - 1))}
-              className="h-6 w-6 rounded-full bg-stone-100 text-stone-600"
+              className="h-6 w-6 rounded-full bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300"
             >
               −
             </button>
-            <span className="w-4 text-center">{effectiveServings}</span>
+            <span className="w-4 text-center dark:text-stone-200">{effectiveServings}</span>
             <button
               onClick={() => setServingsOverride(effectiveServings + 1)}
-              className="h-6 w-6 rounded-full bg-stone-100 text-stone-600"
+              className="h-6 w-6 rounded-full bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-300"
             >
               +
             </button>
           </div>
         </div>
-        <ul className="divide-y divide-stone-100 overflow-hidden rounded-xl bg-white shadow-sm">
+        <ul className="divide-y divide-stone-100 overflow-hidden rounded-xl bg-white shadow-sm dark:divide-stone-800 dark:bg-stone-900">
           {recipe.ingredients.map((ri) => {
             const ingredient = ingredientsById.get(ri.ingredientId)
             const scale = effectiveServings / recipe.servings
@@ -114,19 +114,19 @@ export function RecipeDetailPage() {
             const insufficient = match?.insufficientIngredientIds.includes(ri.ingredientId)
             return (
               <li key={ri.ingredientId} className="flex items-center justify-between px-3 py-2.5 text-sm">
-                <span className="text-stone-800">
+                <span className="text-stone-800 dark:text-stone-200">
                   {ingredient?.name ?? 'Ingrediente eliminado'}
-                  {ri.optional && <span className="ml-1 text-stone-400">(opcional)</span>}
+                  {ri.optional && <span className="ml-1 text-stone-400 dark:text-stone-500">(opcional)</span>}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="text-stone-500">{formatQuantity(ri.quantity * scale, ri.unit)}</span>
-                  {!ri.optional && missing && <span className="text-red-500" title="No está en tu despensa">✕</span>}
+                  <span className="text-stone-500 dark:text-stone-400">{formatQuantity(ri.quantity * scale, ri.unit)}</span>
+                  {!ri.optional && missing && <span className="text-red-500 dark:text-red-400" title="No está en tu despensa">✕</span>}
                   {!ri.optional && insufficient && (
-                    <span className="text-amber-500" title="Tienes menos cantidad de la necesaria">
+                    <span className="text-amber-500 dark:text-amber-400" title="Tienes menos cantidad de la necesaria">
                       !
                     </span>
                   )}
-                  {!ri.optional && !missing && !insufficient && <span className="text-brand-600">✓</span>}
+                  {!ri.optional && !missing && !insufficient && <span className="text-brand-600 dark:text-brand-400">✓</span>}
                 </span>
               </li>
             )
@@ -136,7 +136,7 @@ export function RecipeDetailPage() {
 
       {recipe.toolIds.length > 0 && (
         <section className="mb-5">
-          <h2 className="mb-2 font-semibold text-stone-900">Utensilios necesarios</h2>
+          <h2 className="mb-2 font-semibold text-stone-900 dark:text-stone-100">Utensilios necesarios</h2>
           <div className="flex flex-wrap gap-2">
             {recipe.toolIds.map((toolId) => {
               const tool = toolsById.get(toolId)
@@ -145,7 +145,9 @@ export function RecipeDetailPage() {
                 <span
                   key={toolId}
                   className={`rounded-full px-3 py-1 text-sm ${
-                    owned ? 'bg-brand-100 text-brand-700' : 'bg-stone-100 text-stone-500'
+                    owned
+                      ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
+                      : 'bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400'
                   }`}
                 >
                   {owned ? '✓ ' : ''}
@@ -158,17 +160,17 @@ export function RecipeDetailPage() {
       )}
 
       <section className="mb-5">
-        <h2 className="mb-2 font-semibold text-stone-900">Pasos</h2>
+        <h2 className="mb-2 font-semibold text-stone-900 dark:text-stone-100">Pasos</h2>
         <ol className="space-y-3">
           {recipe.steps
             .slice()
             .sort((a, b) => a.order - b.order)
             .map((step) => (
-              <li key={step.order} className="flex gap-3 rounded-xl bg-white p-3 shadow-sm">
+              <li key={step.order} className="flex gap-3 rounded-xl bg-white p-3 shadow-sm dark:bg-stone-900">
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-medium text-white">
                   {step.order}
                 </span>
-                <p className="text-stone-700">{step.text}</p>
+                <p className="text-stone-700 dark:text-stone-300">{step.text}</p>
               </li>
             ))}
         </ol>
@@ -181,7 +183,7 @@ export function RecipeDetailPage() {
         </section>
       )}
 
-      <button onClick={handleDelete} className="mb-8 text-sm font-medium text-red-500">
+      <button onClick={handleDelete} className="mb-8 text-sm font-medium text-red-500 dark:text-red-400">
         Eliminar receta
       </button>
     </div>

@@ -7,6 +7,16 @@
     <meta name="theme-color" content="#16a34a" />
     <meta name="description" content="Gestiona tu despensa, tus utensilios y descubre qué recetas puedes cocinar con lo que tienes." />
     <title>RecipeMaker</title>
+    <script>
+      // Aplica el tema antes de pintar para evitar parpadeos (FOUC) al cargar.
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('recipemaker-theme')
+          var isDark = stored === 'dark' || (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          if (isDark) document.documentElement.classList.add('dark')
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

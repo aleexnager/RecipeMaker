@@ -47,17 +47,17 @@ export function ToolsPage() {
   return (
     <div className="p-4">
       <header className="mb-1 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-stone-900">Mis utensilios</h1>
+        <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100">Mis utensilios</h1>
       </header>
-      <p className="mb-4 text-sm text-stone-500">
+      <p className="mb-4 text-sm text-stone-500 dark:text-stone-400">
         {ownedCount} de {tools?.length ?? 0} marcados como disponibles. Se usan para saber qué recetas puedes cocinar.
       </p>
 
       <div className="space-y-5">
         {grouped.map(([category, items]) => (
           <section key={category}>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-stone-500">{category}</h2>
-            <ul className="divide-y divide-stone-100 overflow-hidden rounded-xl bg-white shadow-sm">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">{category}</h2>
+            <ul className="divide-y divide-stone-100 overflow-hidden rounded-xl bg-white shadow-sm dark:divide-stone-800 dark:bg-stone-900">
               {items.map((tool) => (
                 <li key={tool.id} className="flex items-center justify-between px-3 py-2.5">
                   <label className="flex flex-1 items-center gap-3">
@@ -65,15 +65,15 @@ export function ToolsPage() {
                       type="checkbox"
                       checked={tool.owned}
                       onChange={(e) => toggleOwned(tool.id, e.target.checked)}
-                      className="h-5 w-5 rounded border-stone-300 text-brand-600 focus:ring-brand-500"
+                      className="h-5 w-5 rounded border-stone-300 text-brand-600 focus:ring-brand-500 dark:border-stone-600 dark:bg-stone-800"
                     />
-                    <span className="text-stone-800">{tool.name}</span>
+                    <span className="text-stone-800 dark:text-stone-200">{tool.name}</span>
                   </label>
                   {tool.custom && (
                     <button
                       onClick={() => removeCustomTool(tool.id)}
                       aria-label="Eliminar"
-                      className="text-stone-300 hover:text-red-500"
+                      className="text-stone-300 hover:text-red-500 dark:text-stone-600 dark:hover:text-red-400"
                     >
                       ✕
                     </button>
@@ -86,7 +86,7 @@ export function ToolsPage() {
       </div>
 
       <section className="mt-6">
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-stone-500">Añadir otro utensilio</h2>
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Añadir otro utensilio</h2>
         <div className="flex gap-2">
           <input
             type="text"
@@ -94,7 +94,7 @@ export function ToolsPage() {
             value={newToolName}
             onChange={(e) => setNewToolName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addCustomTool()}
-            className="flex-1 rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none"
+            className="flex-1 rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
           />
           <button
             onClick={addCustomTool}

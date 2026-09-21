@@ -13,13 +13,13 @@ const ROWS: Array<{ key: keyof NutritionFacts; label: string; unit: string; inde
 
 export function NutritionLabel({ facts, title }: { facts: NutritionFacts; title: string }) {
   return (
-    <div className="rounded-xl border border-stone-200 bg-white p-4">
-      <h3 className="mb-2 font-semibold text-stone-900">{title}</h3>
-      <dl className="divide-y divide-stone-100 text-sm">
+    <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
+      <h3 className="mb-2 font-semibold text-stone-900 dark:text-stone-100">{title}</h3>
+      <dl className="divide-y divide-stone-100 text-sm dark:divide-stone-800">
         {ROWS.map(({ key, label, unit, indent }) => (
           <div key={key} className="flex justify-between py-1.5">
-            <dt className={indent ? 'pl-3 text-stone-500' : 'text-stone-700'}>{label}</dt>
-            <dd className="font-medium text-stone-800">
+            <dt className={indent ? 'pl-3 text-stone-500 dark:text-stone-400' : 'text-stone-700 dark:text-stone-300'}>{label}</dt>
+            <dd className="font-medium text-stone-800 dark:text-stone-100">
               {facts[key]} {unit}
             </dd>
           </div>

@@ -9,6 +9,7 @@ Web app (PWA) para gestionar tu despensa, tus utensilios de cocina y descubrir q
 - **Recetas**: crea recetas con ingredientes, cantidades, pasos, tiempo de preparación/cocción, raciones y utensilios necesarios.
 - **Qué puedo cocinar**: filtra recetas por tiempo disponible, por si puedes hacerlas ya con tu despensa actual, o por si dispones de los utensilios necesarios.
 - **Nutrición**: cálculo automático de calorías, proteínas, grasas, carbohidratos, fibra, azúcares y sal por receta, total y por ración.
+- **Tema claro/oscuro**: selector con tres estados (claro, oscuro, según el sistema), persistido en el dispositivo.
 
 ## Stack técnico
 
@@ -29,3 +30,9 @@ npm run build    # build de producción (typecheck + build)
 npm run lint      # oxlint
 npm run preview  # sirve el build de producción
 ```
+
+## Despliegue en Vercel
+
+Proyecto Vite estándar, detectado automáticamente por Vercel (build command `vite build`, output `dist`). El `vercel.json` incluido añade el rewrite necesario para que las rutas de React Router (p. ej. `/recipes/abc123`) funcionen al recargar o compartir un enlace directo.
+
+Para desplegar: importa el repositorio en [vercel.com/new](https://vercel.com/new) (framework preset "Vite", sin variables de entorno necesarias) o, con la CLI, `vercel --prod` desde la raíz del proyecto.
