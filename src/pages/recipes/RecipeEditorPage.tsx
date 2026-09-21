@@ -5,6 +5,13 @@ import { db } from '../../db/database'
 import { newId } from '../../lib/id'
 import { NutritionFieldsEditor } from '../../components/NutritionFieldsEditor'
 import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronUpIcon,
+  CloseIcon,
+  PlusIcon,
+} from '../../components/icons'
+import {
   EMPTY_NUTRITION,
   INGREDIENT_CATEGORIES,
   RECIPE_CATEGORIES,
@@ -16,6 +23,17 @@ import {
   type RecipeIngredient,
   type Unit,
 } from '../../types'
+
+/** Estilo compartido para inputs/selects/textareas: tarjeta plana con anillo sutil, al estilo iOS. */
+const fieldClass =
+  'w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-[15px] shadow-sm shadow-black/[0.03] outline-none ring-1 ring-black/[0.04] focus:ring-2 focus:ring-brand-500 dark:bg-zinc-900 dark:text-zinc-100 dark:ring-white/[0.06]'
+
+const chipClass = (active: boolean) =>
+  `tap rounded-full px-3.5 py-1.5 text-sm font-medium ${
+    active
+      ? 'bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
+      : 'bg-zinc-200/60 text-zinc-600 dark:bg-zinc-800/70 dark:text-zinc-300'
+  }`
 
 interface DraftStep {
   key: string
@@ -140,85 +158,89 @@ export function RecipeEditorPage() {
   }
 
   if (isEditing && !existingRecipe && loadedFromExisting === false) {
-    return <div className="p-4 text-stone-500 dark:text-stone-400">Cargando…</div>
+    return <div className="p-4 text-zinc-500 dark:text-zinc-400">Cargando…</div>
   }
 
   return (
-    <div className="p-4 pb-10">
-      <header className="mb-4 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="text-stone-500 dark:text-stone-400" aria-label="Volver">
-          ←
+    <div className="px-4 pt-2 pb-10">
+      <header className="mb-4 flex items-center gap-1">
+        <button
+          onClick={() => navigate(-1)}
+          aria-label="Volver"
+          className="tap -ml-1.5 flex h-8 w-8 items-center justify-center rounded-full text-brand-600 dark:text-brand-400"
+        >
+          <ChevronLeftIcon className="h-5 w-5" strokeWidth={2.25} />
         </button>
-        <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100">{isEditing ? 'Editar receta' : 'Nueva receta'}</h1>
+        <h1 className="text-[19px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+          {isEditing ? 'Editar receta' : 'Nueva receta'}
+        </h1>
       </header>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         <label className="block text-sm">
-          <span className="mb-1 block text-stone-600 dark:text-stone-300">Nombre *</span>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-          />
+          <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Nombre *
+          </span>
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} />
         </label>
 
         <label className="block text-sm">
-          <span className="mb-1 block text-stone-600 dark:text-stone-300">Descripción</span>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={2}
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-          />
+          <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Descripción
+          </span>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className={fieldClass} />
         </label>
 
         <div className="grid grid-cols-3 gap-3">
           <label className="text-sm">
-            <span className="mb-1 block text-stone-600 dark:text-stone-300">Raciones</span>
+            <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Raciones
+            </span>
             <input
               type="number"
               min={1}
               value={servings}
               onChange={(e) => setServings(Number(e.target.value) || 1)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+              className={fieldClass}
             />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block text-stone-600 dark:text-stone-300">Prep. (min)</span>
+            <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Prep. (min)
+            </span>
             <input
               type="number"
               min={0}
               value={prepTimeMinutes}
               onChange={(e) => setPrepTimeMinutes(Number(e.target.value) || 0)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+              className={fieldClass}
             />
           </label>
           <label className="text-sm">
-            <span className="mb-1 block text-stone-600 dark:text-stone-300">Cocción (min)</span>
+            <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              Cocción (min)
+            </span>
             <input
               type="number"
               min={0}
               value={cookTimeMinutes}
               onChange={(e) => setCookTimeMinutes(Number(e.target.value) || 0)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+              className={fieldClass}
             />
           </label>
         </div>
 
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Categorías</h2>
+          <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Categorías
+          </h2>
           <div className="flex flex-wrap gap-2">
             {RECIPE_CATEGORIES.map((category) => (
               <button
                 key={category}
                 type="button"
                 onClick={() => toggleCategory(category)}
-                className={`rounded-full border px-3 py-1.5 text-sm ${
-                  categories.includes(category)
-                    ? 'border-brand-600 bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
-                    : 'border-stone-300 bg-white text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300'
-                }`}
+                className={chipClass(categories.includes(category))}
               >
                 {category}
               </button>
@@ -236,11 +258,13 @@ export function RecipeEditorPage() {
         />
 
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Pasos *</h2>
+          <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Pasos *
+          </h2>
           <ol className="space-y-2">
             {steps.map((step, index) => (
               <li key={step.key} className="flex items-start gap-2">
-                <span className="mt-2 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-stone-200 text-xs font-medium text-stone-600 dark:bg-stone-800 dark:text-stone-300">
+                <span className="mt-2.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-xs font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
                   {index + 1}
                 </span>
                 <textarea
@@ -248,47 +272,65 @@ export function RecipeEditorPage() {
                   onChange={(e) => updateStep(step.key, e.target.value)}
                   rows={2}
                   placeholder="Describe este paso…"
-                  className="flex-1 rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+                  className={`flex-1 ${fieldClass}`}
                 />
-                <div className="flex flex-col gap-1">
-                  <button type="button" onClick={() => moveStep(index, -1)} className="text-stone-400 dark:text-stone-500" aria-label="Subir">
-                    ↑
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    type="button"
+                    onClick={() => moveStep(index, -1)}
+                    className="tap flex h-6 w-6 items-center justify-center text-zinc-400 dark:text-zinc-500"
+                    aria-label="Subir"
+                  >
+                    <ChevronUpIcon className="h-4 w-4" strokeWidth={2} />
                   </button>
-                  <button type="button" onClick={() => moveStep(index, 1)} className="text-stone-400 dark:text-stone-500" aria-label="Bajar">
-                    ↓
+                  <button
+                    type="button"
+                    onClick={() => moveStep(index, 1)}
+                    className="tap flex h-6 w-6 items-center justify-center text-zinc-400 dark:text-zinc-500"
+                    aria-label="Bajar"
+                  >
+                    <ChevronDownIcon className="h-4 w-4" strokeWidth={2} />
                   </button>
-                  <button type="button" onClick={() => removeStep(step.key)} className="text-stone-300 hover:text-red-500 dark:text-stone-600 dark:hover:text-red-400" aria-label="Eliminar">
-                    ✕
+                  <button
+                    type="button"
+                    onClick={() => removeStep(step.key)}
+                    className="tap flex h-6 w-6 items-center justify-center text-zinc-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400"
+                    aria-label="Eliminar"
+                  >
+                    <CloseIcon className="h-3.5 w-3.5" strokeWidth={2} />
                   </button>
                 </div>
               </li>
             ))}
           </ol>
-          <button type="button" onClick={addStep} className="mt-2 text-sm font-medium text-brand-600 dark:text-brand-400">
-            + Añadir paso
+          <button
+            type="button"
+            onClick={addStep}
+            className="tap mt-2 flex items-center gap-1 text-sm font-medium text-brand-600 dark:text-brand-400"
+          >
+            <PlusIcon className="h-4 w-4" strokeWidth={2.25} />
+            Añadir paso
           </button>
         </div>
 
         <div>
-          <h2 className="mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Utensilios necesarios</h2>
+          <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Utensilios necesarios
+          </h2>
           <div className="space-y-3">
             {TOOL_CATEGORIES.map((category) => {
               const items = (tools ?? []).filter((t) => t.category === category)
               if (items.length === 0) return null
               return (
                 <div key={category}>
-                  <p className="mb-1 text-xs font-medium uppercase tracking-wide text-stone-400 dark:text-stone-500">{category}</p>
+                  <p className="mb-1 px-1 text-xs font-medium text-zinc-400 dark:text-zinc-500">{category}</p>
                   <div className="flex flex-wrap gap-2">
                     {items.map((tool) => (
                       <button
                         key={tool.id}
                         type="button"
                         onClick={() => toggleTool(tool.id)}
-                        className={`rounded-full border px-3 py-1.5 text-sm ${
-                          toolIds.includes(tool.id)
-                            ? 'border-brand-600 bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
-                            : 'border-stone-300 bg-white text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300'
-                        }`}
+                        className={chipClass(toolIds.includes(tool.id))}
                       >
                         {tool.name}
                       </button>
@@ -304,7 +346,7 @@ export function RecipeEditorPage() {
           type="button"
           disabled={!canSave}
           onClick={handleSave}
-          className="w-full rounded-xl bg-brand-600 py-3 font-medium text-white disabled:opacity-40 dark:disabled:opacity-30"
+          className="tap w-full rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20 disabled:opacity-40 dark:disabled:opacity-30"
         >
           {isEditing ? 'Guardar cambios' : 'Crear receta'}
         </button>
@@ -346,46 +388,59 @@ function IngredientsEditor({
 
   return (
     <div>
-      <h2 className="mb-2 text-sm font-semibold text-stone-700 dark:text-stone-300">Ingredientes *</h2>
+      <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+        Ingredientes *
+      </h2>
 
-      <ul className="mb-3 space-y-2">
-        {rows.map((row, index) => {
-          const ingredient = ingredientsById.get(row.ingredientId)
-          return (
-            <li key={`${row.ingredientId}-${index}`} className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-sm dark:bg-stone-900">
-              <span className="flex-1 truncate text-sm text-stone-800 dark:text-stone-200">{ingredient?.name ?? '…'}</span>
-              <input
-                type="number"
-                min={0}
-                value={row.quantity}
-                onChange={(e) => onUpdateRow(index, { quantity: Number(e.target.value) || 0 })}
-                className="w-20 rounded-lg border border-stone-300 px-2 py-1.5 text-sm focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
-              />
-              <select
-                value={row.unit}
-                onChange={(e) => onUpdateRow(index, { unit: e.target.value as Unit })}
-                className="rounded-lg border border-stone-300 px-2 py-1.5 text-sm focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
+      {rows.length > 0 && (
+        <ul className="mb-3 overflow-hidden rounded-2xl bg-white shadow-sm shadow-black/[0.03] dark:bg-zinc-900">
+          {rows.map((row, index) => {
+            const ingredient = ingredientsById.get(row.ingredientId)
+            return (
+              <li
+                key={`${row.ingredientId}-${index}`}
+                className={`flex items-center gap-2 p-2.5 ${
+                  index > 0 ? 'border-t border-black/[0.06] dark:border-white/[0.06]' : ''
+                }`}
               >
-                <option value="g">g</option>
-                <option value="ml">ml</option>
-                <option value="unit">ud.</option>
-              </select>
-              <label className="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
+                <span className="flex-1 truncate text-sm text-zinc-800 dark:text-zinc-200">{ingredient?.name ?? '…'}</span>
                 <input
-                  type="checkbox"
-                  checked={row.optional}
-                  onChange={(e) => onUpdateRow(index, { optional: e.target.checked })}
-                  className="h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500 dark:border-stone-600 dark:bg-stone-800"
+                  type="number"
+                  min={0}
+                  value={row.quantity}
+                  onChange={(e) => onUpdateRow(index, { quantity: Number(e.target.value) || 0 })}
+                  className="w-16 rounded-lg bg-zinc-100 px-2 py-1.5 text-center text-sm outline-none focus:ring-2 focus:ring-brand-500 dark:bg-zinc-800 dark:text-zinc-100"
                 />
-                Opc.
-              </label>
-              <button type="button" onClick={() => onRemoveRow(index)} className="text-stone-300 hover:text-red-500 dark:text-stone-600 dark:hover:text-red-400">
-                ✕
-              </button>
-            </li>
-          )
-        })}
-      </ul>
+                <select
+                  value={row.unit}
+                  onChange={(e) => onUpdateRow(index, { unit: e.target.value as Unit })}
+                  className="rounded-lg bg-zinc-100 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-brand-500 dark:bg-zinc-800 dark:text-zinc-100"
+                >
+                  <option value="g">g</option>
+                  <option value="ml">ml</option>
+                  <option value="unit">ud.</option>
+                </select>
+                <label className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                  <input
+                    type="checkbox"
+                    checked={row.optional}
+                    onChange={(e) => onUpdateRow(index, { optional: e.target.checked })}
+                    className="h-4 w-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500 dark:border-zinc-600 dark:bg-zinc-800"
+                  />
+                  Opc.
+                </label>
+                <button
+                  type="button"
+                  onClick={() => onRemoveRow(index)}
+                  className="tap flex h-6 w-6 items-center justify-center text-zinc-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400"
+                >
+                  <CloseIcon className="h-3.5 w-3.5" strokeWidth={2} />
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
 
       <div className="relative">
         <input
@@ -393,10 +448,10 @@ function IngredientsEditor({
           placeholder="Buscar ingrediente para añadir…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+          className={fieldClass}
         />
         {filtered.length > 0 && (
-          <ul className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-stone-200 bg-white shadow-lg dark:border-stone-700 dark:bg-stone-900">
+          <ul className="absolute z-10 mt-1.5 max-h-56 w-full overflow-y-auto rounded-2xl bg-white p-1 shadow-lg shadow-black/10 ring-1 ring-black/[0.04] dark:bg-zinc-900 dark:ring-white/[0.06]">
             {filtered.map((ingredient) => (
               <li key={ingredient.id}>
                 <button
@@ -405,10 +460,10 @@ function IngredientsEditor({
                     onAdd(ingredient)
                     setSearch('')
                   }}
-                  className="block w-full px-3 py-2 text-left text-sm hover:bg-stone-50 dark:text-stone-200 dark:hover:bg-stone-800"
+                  className="block w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
                 >
                   {ingredient.name}
-                  {ingredient.brand && <span className="ml-1 text-stone-400 dark:text-stone-500">· {ingredient.brand}</span>}
+                  {ingredient.brand && <span className="ml-1 text-zinc-400 dark:text-zinc-500">· {ingredient.brand}</span>}
                 </button>
               </li>
             ))}
@@ -419,9 +474,19 @@ function IngredientsEditor({
       <button
         type="button"
         onClick={() => setShowQuickCreate((v) => !v)}
-        className="mt-2 text-sm font-medium text-brand-600 dark:text-brand-400"
+        className="tap mt-2 flex items-center gap-1 text-sm font-medium text-brand-600 dark:text-brand-400"
       >
-        {showQuickCreate ? 'Cancelar' : '+ Crear ingrediente nuevo'}
+        {showQuickCreate ? (
+          <>
+            <CloseIcon className="h-4 w-4" strokeWidth={2} />
+            Cancelar
+          </>
+        ) : (
+          <>
+            <PlusIcon className="h-4 w-4" strokeWidth={2.25} />
+            Crear ingrediente nuevo
+          </>
+        )}
       </button>
 
       {showQuickCreate && <QuickCreateIngredient onCreate={handleQuickCreate} />}
@@ -449,24 +514,19 @@ function QuickCreateIngredient({ onCreate }: { onCreate: (ingredient: Ingredient
   }
 
   return (
-    <div className="mt-3 space-y-3 rounded-lg border border-stone-200 bg-stone-50 p-3 dark:border-stone-700 dark:bg-stone-800/50">
+    <div className="mt-3 space-y-3 rounded-2xl bg-zinc-100/70 p-3.5 dark:bg-zinc-900/60">
       <label className="block text-sm">
-        <span className="mb-1 block text-stone-600 dark:text-stone-300">Nombre *</span>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-        />
+        <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+          Nombre *
+        </span>
+        <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="text-sm">
-          <span className="mb-1 block text-stone-600 dark:text-stone-300">Categoría</span>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as IngredientCategory)}
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-          >
+          <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Categoría
+          </span>
+          <select value={category} onChange={(e) => setCategory(e.target.value as IngredientCategory)} className={fieldClass}>
             {INGREDIENT_CATEGORIES.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -475,12 +535,10 @@ function QuickCreateIngredient({ onCreate }: { onCreate: (ingredient: Ingredient
           </select>
         </label>
         <label className="text-sm">
-          <span className="mb-1 block text-stone-600 dark:text-stone-300">Unidad</span>
-          <select
-            value={defaultUnit}
-            onChange={(e) => setDefaultUnit(e.target.value as Unit)}
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-          >
+          <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            Unidad
+          </span>
+          <select value={defaultUnit} onChange={(e) => setDefaultUnit(e.target.value as Unit)} className={fieldClass}>
             <option value="g">Gramos</option>
             <option value="ml">Mililitros</option>
             <option value="unit">Unidades</option>
@@ -492,7 +550,7 @@ function QuickCreateIngredient({ onCreate }: { onCreate: (ingredient: Ingredient
         type="button"
         disabled={!name.trim()}
         onClick={submit}
-        className="w-full rounded-lg bg-brand-600 py-2 font-medium text-white disabled:opacity-40"
+        className="tap w-full rounded-xl bg-brand-600 py-2.5 font-semibold text-white disabled:opacity-40"
       >
         Añadir ingrediente a la receta
       </button>

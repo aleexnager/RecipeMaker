@@ -22,7 +22,7 @@ export function resolveTheme(preference: ThemePreference): 'light' | 'dark' {
   return preference === 'system' ? (prefersDark() ? 'dark' : 'light') : preference
 }
 
-const THEME_COLOR = { light: '#16a34a', dark: '#0c0a09' } as const
+const THEME_COLOR = { light: '#f2f2f7', dark: '#000000' } as const
 
 export function applyTheme(preference: ThemePreference): void {
   const resolved = resolveTheme(preference)

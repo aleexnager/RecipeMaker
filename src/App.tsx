@@ -18,8 +18,8 @@ function App() {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-stone-100 text-stone-400 dark:bg-stone-950 dark:text-stone-500">
-        Cargando…
+      <div className="flex min-h-screen items-center justify-center bg-zinc-100 dark:bg-black">
+        <div className="h-7 w-7 animate-spin rounded-full border-[3px] border-zinc-300 border-t-brand-500 dark:border-zinc-700 dark:border-t-brand-400" />
       </div>
     )
   }

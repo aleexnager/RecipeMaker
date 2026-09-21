@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'RecipeMaker',
         short_name: 'RecipeMaker',
         description: 'Gestiona tu despensa, tus utensilios y descubre qué recetas puedes cocinar',
-        theme_color: '#16a34a',
-        background_color: '#f5f5f4',
+        theme_color: '#f2f2f7',
+        background_color: '#f2f2f7',
         display: 'standalone',
         start_url: '/',
         icons: [

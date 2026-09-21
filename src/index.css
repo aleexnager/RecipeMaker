@@ -3,16 +3,21 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-brand-50: #f0fdf4;
-  --color-brand-100: #dcfce7;
-  --color-brand-200: #bbf7d0;
-  --color-brand-300: #86efac;
-  --color-brand-400: #4ade80;
-  --color-brand-500: #22c55e;
-  --color-brand-600: #16a34a;
-  --color-brand-700: #15803d;
-  --color-brand-800: #166534;
-  --color-brand-900: #14532d;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', system-ui, Roboto, Helvetica,
+    Arial, sans-serif;
+
+  /* Verde afín al system green de iOS: vivo pero no saturado, funciona igual de bien en claro y oscuro. */
+  --color-brand-50: #effcf3;
+  --color-brand-100: #d9f9e0;
+  --color-brand-200: #b3f1c1;
+  --color-brand-300: #7ce29c;
+  --color-brand-400: #46cb75;
+  --color-brand-500: #30d158;
+  --color-brand-600: #1fae44;
+  --color-brand-700: #1a8c39;
+  --color-brand-800: #196f31;
+  --color-brand-900: #155c2a;
 }
 
 html,
@@ -21,16 +26,23 @@ body,
   height: 100%;
 }
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   margin: 0;
-  background: #f5f5f4;
-  color: #1c1917;
+  background: #f2f2f7;
+  color: #1c1c1e;
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .dark body {
-  background: #0c0a09;
-  color: #e7e5e4;
+  background: #000000;
+  color: #f2f2f7;
 }
 
 /* Evita el parpadeo del selector nativo (fecha, hora, etc.) en modo oscuro. */
@@ -38,8 +50,34 @@ body {
   color-scheme: dark;
 }
 
+button {
+  -webkit-appearance: none;
+  touch-action: manipulation;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+/* Feedback táctil sutil, al estilo iOS, para toda superficie interactiva. */
+.tap {
+  transition:
+    transform 0.15s cubic-bezier(0.25, 0.1, 0.25, 1),
+    opacity 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.tap:active {
+  transform: scale(0.96);
+  opacity: 0.85;
+}
+
 @supports (padding: max(0px)) {
   .safe-bottom {
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-top {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
   }
 }

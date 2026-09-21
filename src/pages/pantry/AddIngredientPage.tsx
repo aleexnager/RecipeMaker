@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
 import { NutritionFieldsEditor } from '../../components/NutritionFieldsEditor'
+import { CameraIcon, ChevronLeftIcon } from '../../components/icons'
 
 const BarcodeScanner = lazy(() =>
   import('../../components/BarcodeScanner').then((m) => ({ default: m.BarcodeScanner })),
@@ -10,6 +11,11 @@ const BarcodeScanner = lazy(() =>
 import { lookupBarcode } from '../../lib/openFoodFacts'
 import { newId } from '../../lib/id'
 import { EMPTY_NUTRITION, INGREDIENT_CATEGORIES, type Ingredient, type IngredientCategory, type Unit } from '../../types'
+
+const fieldClass =
+  'w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-[15px] shadow-sm shadow-black/[0.03] outline-none ring-1 ring-black/[0.04] focus:ring-2 focus:ring-brand-500 dark:bg-zinc-900 dark:text-zinc-100 dark:ring-white/[0.06]'
+
+const labelClass = 'mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400'
 
 type Mode = 'existing' | 'new'
 
@@ -121,32 +127,37 @@ export function AddIngredientPage() {
   }
 
   return (
-    <div className="p-4">
-      <header className="mb-4 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="text-stone-500 dark:text-stone-400" aria-label="Volver">
-          ←
+    <div className="px-4 pt-2 pb-4">
+      <header className="mb-4 flex items-center gap-1">
+        <button
+          onClick={() => navigate(-1)}
+          aria-label="Volver"
+          className="tap -ml-1.5 flex h-8 w-8 items-center justify-center rounded-full text-brand-600 dark:text-brand-400"
+        >
+          <ChevronLeftIcon className="h-5 w-5" strokeWidth={2.25} />
         </button>
-        <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100">Añadir a la despensa</h1>
+        <h1 className="text-[19px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Añadir a la despensa</h1>
       </header>
 
       <button
         type="button"
         onClick={() => setScannerOpen(true)}
-        className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 py-3 font-medium text-white active:bg-brand-700"
+        className="tap mb-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20"
       >
-        📷 Escanear código de barras
+        <CameraIcon className="h-5 w-5" strokeWidth={2} />
+        Escanear código de barras
       </button>
-      {scanStatus && <p className="mb-4 text-sm text-stone-600 dark:text-stone-400">{scanStatus}</p>}
+      {scanStatus && <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">{scanStatus}</p>}
 
-      <div className="mb-4 flex rounded-lg bg-stone-200 p-1 text-sm font-medium dark:bg-stone-800">
+      <div className="mb-5 flex rounded-xl bg-zinc-200/60 p-1 text-sm font-medium dark:bg-zinc-800/70">
         <button
-          className={`flex-1 rounded-md py-2 ${mode === 'existing' ? 'bg-white shadow-sm dark:bg-stone-700 dark:text-stone-100' : 'text-stone-500 dark:text-stone-400'}`}
+          className={`tap flex-1 rounded-lg py-2 ${mode === 'existing' ? 'bg-white shadow-sm dark:bg-zinc-700 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'}`}
           onClick={() => setMode('existing')}
         >
           Ingrediente existente
         </button>
         <button
-          className={`flex-1 rounded-md py-2 ${mode === 'new' ? 'bg-white shadow-sm dark:bg-stone-700 dark:text-stone-100' : 'text-stone-500 dark:text-stone-400'}`}
+          className={`tap flex-1 rounded-lg py-2 ${mode === 'new' ? 'bg-white shadow-sm dark:bg-zinc-700 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'}`}
           onClick={() => setMode('new')}
         >
           Ingrediente nuevo
@@ -160,26 +171,26 @@ export function AddIngredientPage() {
             placeholder="Buscar ingrediente…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+            className={fieldClass}
           />
-          <div className="max-h-64 overflow-y-auto rounded-lg border border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900">
+          <div className="max-h-64 overflow-y-auto rounded-2xl bg-white shadow-sm shadow-black/[0.03] dark:bg-zinc-900">
             {filteredIngredients.length === 0 && (
-              <p className="p-3 text-sm text-stone-500 dark:text-stone-400">No hay ingredientes que coincidan. Crea uno nuevo.</p>
+              <p className="p-3.5 text-sm text-zinc-500 dark:text-zinc-400">No hay ingredientes que coincidan. Crea uno nuevo.</p>
             )}
-            {filteredIngredients.map((ing) => (
+            {filteredIngredients.map((ing, index) => (
               <button
                 key={ing.id}
                 onClick={() => {
                   setSelectedIngredientId(ing.id)
                   setQuantityUnit(ing.defaultUnit)
                 }}
-                className={`block w-full border-b border-stone-100 px-3 py-2 text-left last:border-0 dark:border-stone-800 ${
+                className={`block w-full px-3.5 py-2.5 text-left ${index > 0 ? 'border-t border-black/[0.06] dark:border-white/[0.06]' : ''} ${
                   selectedIngredientId === ing.id ? 'bg-brand-50 dark:bg-brand-900/30' : ''
                 }`}
               >
-                <span className="font-medium text-stone-800 dark:text-stone-200">{ing.name}</span>
-                {ing.brand && <span className="ml-1 text-stone-400 dark:text-stone-500">· {ing.brand}</span>}
-                <span className="block text-xs text-stone-400 dark:text-stone-500">{ing.category}</span>
+                <span className="font-medium text-zinc-800 dark:text-zinc-200">{ing.name}</span>
+                {ing.brand && <span className="ml-1 text-zinc-400 dark:text-zinc-500">· {ing.brand}</span>}
+                <span className="block text-xs text-zinc-400 dark:text-zinc-500">{ing.category}</span>
               </button>
             ))}
           </div>
@@ -187,22 +198,22 @@ export function AddIngredientPage() {
           {selectedIngredient && (
             <div className="flex items-end gap-2">
               <label className="flex-1 text-sm">
-                <span className="mb-1 block text-stone-600 dark:text-stone-300">Cantidad</span>
+                <span className={labelClass}>Cantidad</span>
                 <input
                   type="number"
                   inputMode="decimal"
                   min={0}
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+                  className={fieldClass}
                 />
               </label>
               <label className="text-sm">
-                <span className="mb-1 block text-stone-600 dark:text-stone-300">Unidad</span>
+                <span className={labelClass}>Unidad</span>
                 <select
                   value={quantityUnit}
                   onChange={(e) => setQuantityUnit(e.target.value as Unit)}
-                  className="rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+                  className={fieldClass}
                 >
                   <option value="g">g</option>
                   <option value="ml">ml</option>
@@ -216,7 +227,7 @@ export function AddIngredientPage() {
             type="button"
             disabled={!selectedIngredient || !Number(quantity)}
             onClick={handleAddExisting}
-            className="w-full rounded-xl bg-brand-600 py-3 font-medium text-white disabled:opacity-40 dark:disabled:opacity-30"
+            className="tap w-full rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20 disabled:opacity-40 dark:disabled:opacity-30"
           >
             Añadir a la despensa
           </button>
@@ -224,32 +235,18 @@ export function AddIngredientPage() {
       ) : (
         <div className="space-y-4">
           <label className="block text-sm">
-            <span className="mb-1 block text-stone-600 dark:text-stone-300">Nombre *</span>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-            />
+            <span className={labelClass}>Nombre *</span>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} />
           </label>
 
           <label className="block text-sm">
-            <span className="mb-1 block text-stone-600 dark:text-stone-300">Marca</span>
-            <input
-              type="text"
-              value={brand}
-              onChange={(e) => setBrand(e.target.value)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-            />
+            <span className={labelClass}>Marca</span>
+            <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} className={fieldClass} />
           </label>
 
           <label className="block text-sm">
-            <span className="mb-1 block text-stone-600 dark:text-stone-300">Categoría</span>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as IngredientCategory)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-            >
+            <span className={labelClass}>Categoría</span>
+            <select value={category} onChange={(e) => setCategory(e.target.value as IngredientCategory)} className={fieldClass}>
               {INGREDIENT_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
                   {c}
@@ -259,12 +256,8 @@ export function AddIngredientPage() {
           </label>
 
           <label className="block text-sm">
-            <span className="mb-1 block text-stone-600 dark:text-stone-300">Unidad habitual de medida</span>
-            <select
-              value={defaultUnit}
-              onChange={(e) => setDefaultUnit(e.target.value as Unit)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-            >
+            <span className={labelClass}>Unidad habitual de medida</span>
+            <select value={defaultUnit} onChange={(e) => setDefaultUnit(e.target.value as Unit)} className={fieldClass}>
               <option value="g">Gramos (g)</option>
               <option value="ml">Mililitros (ml)</option>
               <option value="unit">Unidades (p.ej. huevos)</option>
@@ -274,14 +267,14 @@ export function AddIngredientPage() {
           <NutritionFieldsEditor value={nutrition} onChange={setNutrition} />
 
           <label className="block text-sm">
-            <span className="mb-1 block text-stone-600 dark:text-stone-300">Cantidad que tienes ahora (opcional)</span>
+            <span className={labelClass}>Cantidad que tienes ahora (opcional)</span>
             <input
               type="number"
               inputMode="decimal"
               min={0}
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+              className={fieldClass}
             />
           </label>
 
@@ -289,7 +282,7 @@ export function AddIngredientPage() {
             type="button"
             disabled={!name.trim()}
             onClick={handleCreateNew}
-            className="w-full rounded-xl bg-brand-600 py-3 font-medium text-white disabled:opacity-40 dark:disabled:opacity-30"
+            className="tap w-full rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20 disabled:opacity-40 dark:disabled:opacity-30"
           >
             Crear ingrediente
           </button>

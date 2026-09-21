@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
 import { matchAndFilterRecipes, type RecipeMatch } from '../../lib/matching'
+import { CheckCircleIcon, ClockIcon, PlusIcon, SearchIcon } from '../../components/icons'
+import { Switch } from '../../components/Switch'
 import { totalTimeMinutes, RECIPE_CATEGORIES, type RecipeCategoryTag } from '../../types'
 
 const TIME_OPTIONS = [
@@ -47,34 +49,38 @@ export function RecipesPage() {
   }
 
   return (
-    <div className="p-4">
+    <div className="px-4 pt-2">
       <header className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100">Recetas</h1>
+        <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Recetas</h1>
         <Link
           to="/recipes/new"
-          className="rounded-full bg-brand-600 px-4 py-2 text-sm font-medium text-white active:bg-brand-700"
+          aria-label="Nueva receta"
+          className="tap flex h-9 w-9 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400"
         >
-          + Nueva
+          <PlusIcon className="h-5 w-5" strokeWidth={2} />
         </Link>
       </header>
 
-      <input
-        type="text"
-        placeholder="Buscar receta…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="mb-3 w-full rounded-lg border border-stone-300 px-3 py-2 focus:border-brand-500 focus:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-      />
+      <div className="relative mb-3">
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" strokeWidth={2} />
+        <input
+          type="text"
+          placeholder="Buscar receta…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full rounded-xl border-0 bg-zinc-200/60 py-2.5 pl-9 pr-3 text-[15px] outline-none placeholder:text-zinc-400 focus:bg-white focus:ring-2 focus:ring-brand-500 dark:bg-zinc-800/70 dark:text-zinc-100 dark:focus:bg-zinc-900"
+        />
+      </div>
 
       <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
         {TIME_OPTIONS.map((opt) => (
           <button
             key={opt.label}
             onClick={() => setMaxTime(opt.value)}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-sm ${
+            className={`tap shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium ${
               maxTime === opt.value
-                ? 'border-brand-600 bg-brand-600 text-white'
-                : 'border-stone-300 bg-white text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300'
+                ? 'bg-brand-600 text-white'
+                : 'bg-zinc-200/60 text-zinc-600 dark:bg-zinc-800/70 dark:text-zinc-300'
             }`}
           >
             {opt.label}
@@ -82,15 +88,15 @@ export function RecipesPage() {
         ))}
       </div>
 
-      <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
         {RECIPE_CATEGORIES.map((category) => (
           <button
             key={category}
             onClick={() => toggleCategory(category)}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-sm ${
+            className={`tap shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium ${
               activeCategories.includes(category)
-                ? 'border-brand-600 bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
-                : 'border-stone-300 bg-white text-stone-600 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300'
+                ? 'bg-brand-50 text-brand-700 dark:bg-brand-900/40 dark:text-brand-300'
+                : 'bg-zinc-200/60 text-zinc-600 dark:bg-zinc-800/70 dark:text-zinc-300'
             }`}
           >
             {category}
@@ -98,32 +104,22 @@ export function RecipesPage() {
         ))}
       </div>
 
-      <div className="mb-4 flex flex-col gap-2 text-sm text-stone-700 dark:text-stone-300">
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={onlyMakeableNow}
-            onChange={(e) => setOnlyMakeableNow(e.target.checked)}
-            className="h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500 dark:border-stone-600 dark:bg-stone-800"
-          />
-          Solo recetas que puedo hacer ya
+      <div className="mb-5 overflow-hidden rounded-2xl bg-white shadow-sm shadow-black/[0.03] dark:bg-zinc-900">
+        <label className="flex items-center justify-between px-3.5 py-2.5 text-[15px] text-zinc-700 dark:text-zinc-300">
+          Solo lo que puedo hacer ya
+          <Switch checked={onlyMakeableNow} onChange={setOnlyMakeableNow} label="Solo recetas que puedo hacer ya" />
         </label>
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={requireOwnedTools}
-            onChange={(e) => setRequireOwnedTools(e.target.checked)}
-            className="h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500 dark:border-stone-600 dark:bg-stone-800"
-          />
-          Solo recetas con mis utensilios
+        <label className="flex items-center justify-between border-t border-black/[0.06] px-3.5 py-2.5 text-[15px] text-zinc-700 dark:border-white/[0.06] dark:text-zinc-300">
+          Solo con mis utensilios
+          <Switch checked={requireOwnedTools} onChange={setRequireOwnedTools} label="Solo recetas con mis utensilios" />
         </label>
       </div>
 
       {matches.length === 0 && (
-        <p className="mt-10 text-center text-stone-500 dark:text-stone-400">No hay recetas que coincidan con estos filtros.</p>
+        <p className="mt-10 text-center text-zinc-500 dark:text-zinc-400">No hay recetas que coincidan con estos filtros.</p>
       )}
 
-      <ul className="space-y-3">
+      <ul className="space-y-3 pb-2">
         {matches.map((match) => (
           <RecipeCard key={match.recipe.id} match={match} />
         ))}
@@ -140,19 +136,23 @@ function RecipeCard({ match }: { match: RecipeMatch }) {
     <li>
       <Link
         to={`/recipes/${recipe.id}`}
-        className="block rounded-xl bg-white p-4 shadow-sm active:bg-stone-50 dark:bg-stone-900 dark:active:bg-stone-800"
+        className="tap block rounded-2xl bg-white p-4 shadow-sm shadow-black/[0.03] dark:bg-zinc-900"
       >
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-stone-900 dark:text-stone-100">{recipe.name}</h3>
-          <span className="shrink-0 text-sm text-stone-500 dark:text-stone-400">⏱ {totalTimeMinutes(recipe)} min</span>
+          <h3 className="font-semibold text-zinc-900 dark:text-zinc-100">{recipe.name}</h3>
+          <span className="flex shrink-0 items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <ClockIcon className="h-3.5 w-3.5" strokeWidth={2} />
+            {totalTimeMinutes(recipe)} min
+          </span>
         </div>
         {recipe.description && (
-          <p className="mt-1 line-clamp-2 text-sm text-stone-500 dark:text-stone-400">{recipe.description}</p>
+          <p className="mt-1 line-clamp-2 text-sm text-zinc-500 dark:text-zinc-400">{recipe.description}</p>
         )}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
           {match.canMakeNow ? (
-            <span className="rounded-full bg-brand-100 px-2.5 py-1 text-xs font-medium text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
-              ✓ Puedes hacerla ya
+            <span className="flex items-center gap-1 rounded-full bg-brand-100 px-2.5 py-1 text-xs font-medium text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
+              <CheckCircleIcon className="h-3.5 w-3.5" strokeWidth={2} />
+              Puedes hacerla ya
             </span>
           ) : (
             <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
@@ -160,12 +160,12 @@ function RecipeCard({ match }: { match: RecipeMatch }) {
             </span>
           )}
           {match.missingToolIds.length > 0 && (
-            <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+            <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
               Falta utensilio
             </span>
           )}
           {recipe.categories.map((c) => (
-            <span key={c} className="rounded-full bg-stone-100 px-2.5 py-1 text-xs text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+            <span key={c} className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
               {c}
             </span>
           ))}

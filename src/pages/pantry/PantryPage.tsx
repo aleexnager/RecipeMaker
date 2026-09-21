@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
 import { formatQuantity } from '../../lib/units'
+import { BasketIcon, CloseIcon, MinusIcon, PlusIcon } from '../../components/icons'
 import type { Unit } from '../../types'
 
 export function PantryPage() {
@@ -37,43 +38,59 @@ export function PantryPage() {
   }
 
   return (
-    <div className="p-4">
-      <header className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-stone-900 dark:text-stone-100">Mi despensa</h1>
+    <div className="px-4 pt-2">
+      <header className="mb-5 flex items-center justify-between">
+        <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Despensa</h1>
         <Link
           to="/pantry/add"
-          className="rounded-full bg-brand-600 px-4 py-2 text-sm font-medium text-white active:bg-brand-700"
+          aria-label="Añadir ingrediente"
+          className="tap flex h-9 w-9 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400"
         >
-          + Añadir
+          <PlusIcon className="h-5 w-5" strokeWidth={2} />
         </Link>
       </header>
 
       {pantryItems?.length === 0 && (
-        <div className="mt-10 text-center text-stone-500 dark:text-stone-400">
-          <p className="mb-3">Tu despensa está vacía.</p>
-          <Link to="/pantry/add" className="font-medium text-brand-600 underline dark:text-brand-400">
-            Añade tu primer ingrediente
+        <div className="mt-16 flex flex-col items-center text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-200/70 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">
+            <BasketIcon className="h-8 w-8" strokeWidth={1.5} />
+          </div>
+          <p className="mb-1 font-medium text-zinc-700 dark:text-zinc-300">Tu despensa está vacía</p>
+          <p className="mb-4 max-w-[24ch] text-sm text-zinc-500 dark:text-zinc-400">
+            Escanea o añade tu primer ingrediente para empezar.
+          </p>
+          <Link
+            to="/pantry/add"
+            className="tap rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white"
+          >
+            Añadir ingrediente
           </Link>
         </div>
       )}
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         {grouped.map(([category, items]) => (
           <section key={category}>
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">{category}</h2>
-            <ul className="space-y-2">
-              {items.map((item) => {
+            <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+              {category}
+            </h2>
+            <ul className="overflow-hidden rounded-2xl bg-white shadow-sm shadow-black/[0.03] dark:bg-zinc-900">
+              {items.map((item, index) => {
                 const ingredient = ingredientsById.get(item.ingredientId)
                 return (
                   <li
                     key={item.id}
-                    className="flex items-center justify-between rounded-xl bg-white p-3 shadow-sm dark:bg-stone-900"
+                    className={`flex items-center justify-between px-3.5 py-3 ${
+                      index > 0 ? 'border-t border-black/[0.06] dark:border-white/[0.06]' : ''
+                    }`}
                   >
-                    <div>
-                      <p className="font-medium text-stone-800 dark:text-stone-100">{ingredient?.name ?? 'Ingrediente eliminado'}</p>
-                      {ingredient?.brand && <p className="text-xs text-stone-400 dark:text-stone-500">{ingredient.brand}</p>}
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-zinc-800 dark:text-zinc-100">
+                        {ingredient?.name ?? 'Ingrediente eliminado'}
+                      </p>
+                      {ingredient?.brand && <p className="text-xs text-zinc-400 dark:text-zinc-500">{ingredient.brand}</p>}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-2">
                       <QuantityStepper
                         quantity={item.quantity}
                         unit={item.unit}
@@ -82,9 +99,9 @@ export function PantryPage() {
                       <button
                         onClick={() => removeItem(item.id)}
                         aria-label="Eliminar"
-                        className="text-stone-300 hover:text-red-500 dark:text-stone-600 dark:hover:text-red-400"
+                        className="tap flex h-7 w-7 items-center justify-center rounded-full text-zinc-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400"
                       >
-                        ✕
+                        <CloseIcon className="h-4 w-4" strokeWidth={2} />
                       </button>
                     </div>
                   </li>
@@ -109,19 +126,23 @@ function QuantityStepper({
 }) {
   const step = unit === 'unit' ? 1 : 10
   return (
-    <div className="flex items-center gap-1.5 rounded-full bg-stone-100 px-1.5 py-1 dark:bg-stone-800">
+    <div className="flex items-center gap-1 rounded-full bg-zinc-100 p-1 dark:bg-zinc-800">
       <button
         onClick={() => onChange(Math.max(0, quantity - step))}
-        className="h-6 w-6 rounded-full bg-white text-stone-600 shadow-sm dark:bg-stone-700 dark:text-stone-200"
+        aria-label="Restar"
+        className="tap flex h-6 w-6 items-center justify-center rounded-full bg-white text-zinc-600 shadow-sm dark:bg-zinc-700 dark:text-zinc-200"
       >
-        −
+        <MinusIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
       </button>
-      <span className="min-w-14 text-center text-sm text-stone-700 dark:text-stone-300">{formatQuantity(quantity, unit)}</span>
+      <span className="min-w-14 text-center text-sm tabular-nums text-zinc-700 dark:text-zinc-300">
+        {formatQuantity(quantity, unit)}
+      </span>
       <button
         onClick={() => onChange(quantity + step)}
-        className="h-6 w-6 rounded-full bg-white text-stone-600 shadow-sm dark:bg-stone-700 dark:text-stone-200"
+        aria-label="Sumar"
+        className="tap flex h-6 w-6 items-center justify-center rounded-full bg-white text-zinc-600 shadow-sm dark:bg-zinc-700 dark:text-zinc-200"
       >
-        +
+        <PlusIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
       </button>
     </div>
   )
