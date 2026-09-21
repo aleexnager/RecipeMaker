@@ -1,5 +1,7 @@
-import type { Ingredient, PantryItem, Recipe } from '../types'
+import type { PantryItem, Recipe } from '../types'
 import { totalTimeMinutes } from '../types'
+import { recipeDisplayName } from './i18n/labels'
+import type { Language } from './i18n/types'
 
 export interface RecipeMatch {
   recipe: Recipe
@@ -59,6 +61,8 @@ export interface RecipeFilters {
   requireOwnedTools?: boolean
   categories?: string[]
   searchText?: string
+  /** Idioma activo: si se indica, la búsqueda también coincide con el nombre traducido de recetas de ejemplo. */
+  language?: Language
 }
 
 export function matchAndFilterRecipes(
@@ -85,7 +89,11 @@ export function matchAndFilterRecipes(
   }
   if (filters.searchText?.trim()) {
     const needle = filters.searchText.trim().toLowerCase()
-    matches = matches.filter((m) => m.recipe.name.toLowerCase().includes(needle))
+    matches = matches.filter((m) => {
+      const literalName = m.recipe.name.toLowerCase()
+      const displayName = filters.language ? recipeDisplayName(m.recipe, filters.language).toLowerCase() : literalName
+      return literalName.includes(needle) || displayName.includes(needle)
+    })
   }
 
   matches.sort((a, b) => {
@@ -97,8 +105,4 @@ export function matchAndFilterRecipes(
   })
 
   return matches
-}
-
-export function ingredientLabel(ingredient: Ingredient | undefined, fallback: string): string {
-  return ingredient?.name ?? fallback
 }

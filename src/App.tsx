@@ -8,12 +8,15 @@ import { RecipesPage } from './pages/recipes/RecipesPage'
 import { RecipeDetailPage } from './pages/recipes/RecipeDetailPage'
 import { RecipeEditorPage } from './pages/recipes/RecipeEditorPage'
 import { ensureSeeded } from './db/seed'
+import { runMigrations } from './db/migrations'
 
 function App() {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    ensureSeeded().finally(() => setReady(true))
+    ensureSeeded()
+      .then(() => runMigrations())
+      .finally(() => setReady(true))
   }, [])
 
   if (!ready) {

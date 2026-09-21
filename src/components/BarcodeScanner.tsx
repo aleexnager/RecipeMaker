@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import type { IScannerControls } from '@zxing/browser'
 import { CloseIcon } from './icons'
+import { useI18n } from '../lib/i18n/context'
 
 interface BarcodeScannerProps {
   onDetected: (barcode: string) => void
@@ -9,6 +10,7 @@ interface BarcodeScannerProps {
 }
 
 export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
+  const { t } = useI18n()
   const videoRef = useRef<HTMLVideoElement>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,8 +42,8 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
       .catch((err: unknown) => {
         setError(
           err instanceof Error
-            ? `No se pudo acceder a la cámara: ${err.message}`
-            : 'No se pudo acceder a la cámara.',
+            ? t('scanner.cameraError', { message: err.message })
+            : t('scanner.cameraErrorGeneric'),
         )
       })
 
@@ -55,11 +57,11 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black">
       <div className="safe-top flex items-center justify-between p-4 text-white">
-        <h2 className="text-[17px] font-semibold tracking-tight">Escanear código de barras</h2>
+        <h2 className="text-[17px] font-semibold tracking-tight">{t('scanner.title')}</h2>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Cerrar"
+          aria-label={t('scanner.close')}
           className="tap flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
         >
           <CloseIcon className="h-4 w-4" strokeWidth={2} />
@@ -82,11 +84,7 @@ export function BarcodeScanner({ onDetected, onClose }: BarcodeScannerProps) {
       </div>
 
       <div className="safe-bottom p-4 text-center text-sm text-white/70">
-        {error ? (
-          <p className="text-red-400">{error}</p>
-        ) : (
-          <p>Apunta la cámara al código de barras del producto.</p>
-        )}
+        {error ? <p className="text-red-400">{error}</p> : <p>{t('scanner.hint')}</p>}
       </div>
     </div>
   )

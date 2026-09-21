@@ -1,12 +1,8 @@
 import type { Unit } from '../types'
+import type { TFunction } from './i18n/context'
+import { unitLabel } from './i18n/labels'
 
-export const UNIT_LABELS: Record<Unit, string> = {
-  g: 'g',
-  ml: 'ml',
-  unit: 'ud.',
-}
-
-export function formatQuantity(quantity: number, unit: Unit): string {
+export function formatQuantity(quantity: number, unit: Unit, t: TFunction): string {
   const rounded = Math.round(quantity * 100) / 100
-  return `${rounded} ${UNIT_LABELS[unit]}`
+  return `${rounded} ${unitLabel(unit, t)}`
 }

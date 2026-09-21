@@ -4,6 +4,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
 import { NutritionFieldsEditor } from '../../components/NutritionFieldsEditor'
 import { CameraIcon, ChevronLeftIcon } from '../../components/icons'
+import { useI18n } from '../../lib/i18n/context'
+import { categoryLabel, ingredientDisplayName, ingredientSearchText, unitLabel } from '../../lib/i18n/labels'
 
 const BarcodeScanner = lazy(() =>
   import('../../components/BarcodeScanner').then((m) => ({ default: m.BarcodeScanner })),
@@ -20,6 +22,7 @@ const labelClass = 'mb-1.5 block px-1 text-[13px] font-semibold uppercase tracki
 type Mode = 'existing' | 'new'
 
 export function AddIngredientPage() {
+  const { t, language } = useI18n()
   const navigate = useNavigate()
   const ingredients = useLiveQuery(() => db.ingredients.orderBy('name').toArray(), [])
   const [mode, setMode] = useState<Mode>('existing')
@@ -34,7 +37,7 @@ export function AddIngredientPage() {
   const [name, setName] = useState('')
   const [brand, setBrand] = useState('')
   const [barcode, setBarcode] = useState('')
-  const [category, setCategory] = useState<IngredientCategory>('Otros')
+  const [category, setCategory] = useState<IngredientCategory>('other')
   const [defaultUnit, setDefaultUnit] = useState<Unit>('g')
   const [nutrition, setNutrition] = useState(EMPTY_NUTRITION)
 
@@ -42,28 +45,26 @@ export function AddIngredientPage() {
     if (!ingredients) return []
     const needle = search.trim().toLowerCase()
     if (!needle) return ingredients
-    return ingredients.filter(
-      (i) => i.name.toLowerCase().includes(needle) || i.brand?.toLowerCase().includes(needle),
-    )
-  }, [ingredients, search])
+    return ingredients.filter((i) => ingredientSearchText(i, language).includes(needle))
+  }, [ingredients, search, language])
 
   const selectedIngredient = ingredients?.find((i) => i.id === selectedIngredientId)
 
   async function handleBarcodeDetected(code: string) {
     setScannerOpen(false)
-    setScanStatus('Buscando producto…')
+    setScanStatus(t('addIngredient.scanStatusSearching'))
 
     const existing = await db.ingredients.where('barcode').equals(code).first()
     if (existing) {
       setMode('existing')
       setSelectedIngredientId(existing.id)
       setQuantityUnit(existing.defaultUnit)
-      setScanStatus(`Ya tienes "${existing.name}" en tu catálogo.`)
+      setScanStatus(t('addIngredient.scanStatusAlreadyHave', { name: ingredientDisplayName(existing, language) }))
       return
     }
 
     try {
-      const result = await lookupBarcode(code)
+      const result = await lookupBarcode(code, language)
       setMode('new')
       setBarcode(code)
       if (result.found) {
@@ -71,14 +72,14 @@ export function AddIngredientPage() {
         setBrand(result.brand ?? '')
         setCategory(result.category)
         setNutrition(result.nutritionPer100g)
-        setScanStatus('Producto encontrado en Open Food Facts. Revisa y completa los datos.')
+        setScanStatus(t('addIngredient.scanStatusFound'))
       } else {
-        setScanStatus('No se encontró el producto. Completa los datos manualmente.')
+        setScanStatus(t('addIngredient.scanStatusNotFound'))
       }
     } catch {
       setMode('new')
       setBarcode(code)
-      setScanStatus('No se pudo consultar Open Food Facts. Completa los datos manualmente.')
+      setScanStatus(t('addIngredient.scanStatusError'))
     }
   }
 
@@ -131,12 +132,12 @@ export function AddIngredientPage() {
       <header className="mb-4 flex items-center gap-1">
         <button
           onClick={() => navigate(-1)}
-          aria-label="Volver"
+          aria-label={t('recipeDetail.backAria')}
           className="tap -ml-1.5 flex h-8 w-8 items-center justify-center rounded-full text-brand-600 dark:text-brand-400"
         >
           <ChevronLeftIcon className="h-5 w-5" strokeWidth={2.25} />
         </button>
-        <h1 className="text-[19px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Añadir a la despensa</h1>
+        <h1 className="text-[19px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t('addIngredient.title')}</h1>
       </header>
 
       <button
@@ -145,7 +146,7 @@ export function AddIngredientPage() {
         className="tap mb-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20"
       >
         <CameraIcon className="h-5 w-5" strokeWidth={2} />
-        Escanear código de barras
+        {t('addIngredient.scanButton')}
       </button>
       {scanStatus && <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">{scanStatus}</p>}
 
@@ -154,13 +155,13 @@ export function AddIngredientPage() {
           className={`tap flex-1 rounded-lg py-2 ${mode === 'existing' ? 'bg-white shadow-sm dark:bg-zinc-700 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'}`}
           onClick={() => setMode('existing')}
         >
-          Ingrediente existente
+          {t('addIngredient.tabExisting')}
         </button>
         <button
           className={`tap flex-1 rounded-lg py-2 ${mode === 'new' ? 'bg-white shadow-sm dark:bg-zinc-700 dark:text-zinc-100' : 'text-zinc-500 dark:text-zinc-400'}`}
           onClick={() => setMode('new')}
         >
-          Ingrediente nuevo
+          {t('addIngredient.tabNew')}
         </button>
       </div>
 
@@ -168,14 +169,14 @@ export function AddIngredientPage() {
         <div className="space-y-3">
           <input
             type="text"
-            placeholder="Buscar ingrediente…"
+            placeholder={t('addIngredient.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className={fieldClass}
           />
           <div className="max-h-64 overflow-y-auto rounded-2xl bg-white shadow-sm shadow-black/[0.03] dark:bg-zinc-900">
             {filteredIngredients.length === 0 && (
-              <p className="p-3.5 text-sm text-zinc-500 dark:text-zinc-400">No hay ingredientes que coincidan. Crea uno nuevo.</p>
+              <p className="p-3.5 text-sm text-zinc-500 dark:text-zinc-400">{t('addIngredient.noMatches')}</p>
             )}
             {filteredIngredients.map((ing, index) => (
               <button
@@ -188,9 +189,9 @@ export function AddIngredientPage() {
                   selectedIngredientId === ing.id ? 'bg-brand-50 dark:bg-brand-900/30' : ''
                 }`}
               >
-                <span className="font-medium text-zinc-800 dark:text-zinc-200">{ing.name}</span>
+                <span className="font-medium text-zinc-800 dark:text-zinc-200">{ingredientDisplayName(ing, language)}</span>
                 {ing.brand && <span className="ml-1 text-zinc-400 dark:text-zinc-500">· {ing.brand}</span>}
-                <span className="block text-xs text-zinc-400 dark:text-zinc-500">{ing.category}</span>
+                <span className="block text-xs text-zinc-400 dark:text-zinc-500">{categoryLabel(ing.category, t)}</span>
               </button>
             ))}
           </div>
@@ -198,7 +199,7 @@ export function AddIngredientPage() {
           {selectedIngredient && (
             <div className="flex items-end gap-2">
               <label className="flex-1 text-sm">
-                <span className={labelClass}>Cantidad</span>
+                <span className={labelClass}>{t('field.quantity')}</span>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -209,15 +210,15 @@ export function AddIngredientPage() {
                 />
               </label>
               <label className="text-sm">
-                <span className={labelClass}>Unidad</span>
+                <span className={labelClass}>{t('field.unit')}</span>
                 <select
                   value={quantityUnit}
                   onChange={(e) => setQuantityUnit(e.target.value as Unit)}
                   className={fieldClass}
                 >
-                  <option value="g">g</option>
-                  <option value="ml">ml</option>
-                  <option value="unit">ud.</option>
+                  <option value="g">{unitLabel('g', t)}</option>
+                  <option value="ml">{unitLabel('ml', t)}</option>
+                  <option value="unit">{unitLabel('unit', t)}</option>
                 </select>
               </label>
             </div>
@@ -229,45 +230,45 @@ export function AddIngredientPage() {
             onClick={handleAddExisting}
             className="tap w-full rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20 disabled:opacity-40 dark:disabled:opacity-30"
           >
-            Añadir a la despensa
+            {t('addIngredient.addToPantry')}
           </button>
         </div>
       ) : (
         <div className="space-y-4">
           <label className="block text-sm">
-            <span className={labelClass}>Nombre *</span>
+            <span className={labelClass}>{t('field.name')}</span>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} />
           </label>
 
           <label className="block text-sm">
-            <span className={labelClass}>Marca</span>
+            <span className={labelClass}>{t('field.brand')}</span>
             <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} className={fieldClass} />
           </label>
 
           <label className="block text-sm">
-            <span className={labelClass}>Categoría</span>
+            <span className={labelClass}>{t('field.category')}</span>
             <select value={category} onChange={(e) => setCategory(e.target.value as IngredientCategory)} className={fieldClass}>
               {INGREDIENT_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {categoryLabel(c, t)}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="block text-sm">
-            <span className={labelClass}>Unidad habitual de medida</span>
+            <span className={labelClass}>{t('addIngredient.defaultUnitLabel')}</span>
             <select value={defaultUnit} onChange={(e) => setDefaultUnit(e.target.value as Unit)} className={fieldClass}>
-              <option value="g">Gramos (g)</option>
-              <option value="ml">Mililitros (ml)</option>
-              <option value="unit">Unidades (p.ej. huevos)</option>
+              <option value="g">{t('unitOption.grams')}</option>
+              <option value="ml">{t('unitOption.milliliters')}</option>
+              <option value="unit">{t('unitOption.units')}</option>
             </select>
           </label>
 
           <NutritionFieldsEditor value={nutrition} onChange={setNutrition} />
 
           <label className="block text-sm">
-            <span className={labelClass}>Cantidad que tienes ahora (opcional)</span>
+            <span className={labelClass}>{t('addIngredient.quantityNowLabel')}</span>
             <input
               type="number"
               inputMode="decimal"
@@ -284,7 +285,7 @@ export function AddIngredientPage() {
             onClick={handleCreateNew}
             className="tap w-full rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20 disabled:opacity-40 dark:disabled:opacity-30"
           >
-            Crear ingrediente
+            {t('addIngredient.createButton')}
           </button>
         </div>
       )}
@@ -293,7 +294,7 @@ export function AddIngredientPage() {
         <Suspense
           fallback={
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black text-white">
-              Cargando cámara…
+              {t('scanner.loadingCamera')}
             </div>
           }
         >

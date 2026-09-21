@@ -4,6 +4,9 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
 import { newId } from '../../lib/id'
 import { NutritionFieldsEditor } from '../../components/NutritionFieldsEditor'
+import { useI18n } from '../../lib/i18n/context'
+import type { TFunction } from '../../lib/i18n/context'
+import { categoryLabel, ingredientDisplayName, ingredientSearchText, recipeCategoryLabel, toolCategoryLabel, toolLabel } from '../../lib/i18n/labels'
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
@@ -35,12 +38,15 @@ const chipClass = (active: boolean) =>
       : 'bg-zinc-200/60 text-zinc-600 dark:bg-zinc-800/70 dark:text-zinc-300'
   }`
 
+const sectionLabelClass = 'mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400'
+
 interface DraftStep {
   key: string
   text: string
 }
 
 export function RecipeEditorPage() {
+  const { t } = useI18n()
   const { id } = useParams<{ id: string }>()
   const isEditing = Boolean(id)
   const navigate = useNavigate()
@@ -158,7 +164,7 @@ export function RecipeEditorPage() {
   }
 
   if (isEditing && !existingRecipe && loadedFromExisting === false) {
-    return <div className="p-4 text-zinc-500 dark:text-zinc-400">Cargando…</div>
+    return <div className="p-4 text-zinc-500 dark:text-zinc-400">{t('editor.loading')}</div>
   }
 
   return (
@@ -166,36 +172,30 @@ export function RecipeEditorPage() {
       <header className="mb-4 flex items-center gap-1">
         <button
           onClick={() => navigate(-1)}
-          aria-label="Volver"
+          aria-label={t('recipeDetail.backAria')}
           className="tap -ml-1.5 flex h-8 w-8 items-center justify-center rounded-full text-brand-600 dark:text-brand-400"
         >
           <ChevronLeftIcon className="h-5 w-5" strokeWidth={2.25} />
         </button>
         <h1 className="text-[19px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-          {isEditing ? 'Editar receta' : 'Nueva receta'}
+          {isEditing ? t('editor.editTitle') : t('editor.newTitle')}
         </h1>
       </header>
 
       <div className="space-y-6">
         <label className="block text-sm">
-          <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Nombre *
-          </span>
+          <span className={sectionLabelClass}>{t('field.name')}</span>
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} />
         </label>
 
         <label className="block text-sm">
-          <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Descripción
-          </span>
+          <span className={sectionLabelClass}>{t('field.description')}</span>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} className={fieldClass} />
         </label>
 
         <div className="grid grid-cols-3 gap-3">
           <label className="text-sm">
-            <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              Raciones
-            </span>
+            <span className={sectionLabelClass}>{t('field.servings')}</span>
             <input
               type="number"
               min={1}
@@ -205,9 +205,7 @@ export function RecipeEditorPage() {
             />
           </label>
           <label className="text-sm">
-            <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              Prep. (min)
-            </span>
+            <span className={sectionLabelClass}>{t('field.prepTime')}</span>
             <input
               type="number"
               min={0}
@@ -217,9 +215,7 @@ export function RecipeEditorPage() {
             />
           </label>
           <label className="text-sm">
-            <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              Cocción (min)
-            </span>
+            <span className={sectionLabelClass}>{t('field.cookTime')}</span>
             <input
               type="number"
               min={0}
@@ -231,9 +227,7 @@ export function RecipeEditorPage() {
         </div>
 
         <div>
-          <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Categorías
-          </h2>
+          <h2 className={sectionLabelClass}>{t('editor.categoriesHeading')}</h2>
           <div className="flex flex-wrap gap-2">
             {RECIPE_CATEGORIES.map((category) => (
               <button
@@ -242,7 +236,7 @@ export function RecipeEditorPage() {
                 onClick={() => toggleCategory(category)}
                 className={chipClass(categories.includes(category))}
               >
-                {category}
+                {recipeCategoryLabel(category, t)}
               </button>
             ))}
           </div>
@@ -258,9 +252,7 @@ export function RecipeEditorPage() {
         />
 
         <div>
-          <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Pasos *
-          </h2>
+          <h2 className={sectionLabelClass}>{t('editor.stepsHeading')}</h2>
           <ol className="space-y-2">
             {steps.map((step, index) => (
               <li key={step.key} className="flex items-start gap-2">
@@ -271,7 +263,7 @@ export function RecipeEditorPage() {
                   value={step.text}
                   onChange={(e) => updateStep(step.key, e.target.value)}
                   rows={2}
-                  placeholder="Describe este paso…"
+                  placeholder={t('editor.stepPlaceholder')}
                   className={`flex-1 ${fieldClass}`}
                 />
                 <div className="flex flex-col gap-0.5">
@@ -279,7 +271,7 @@ export function RecipeEditorPage() {
                     type="button"
                     onClick={() => moveStep(index, -1)}
                     className="tap flex h-6 w-6 items-center justify-center text-zinc-400 dark:text-zinc-500"
-                    aria-label="Subir"
+                    aria-label={t('editor.stepUpAria')}
                   >
                     <ChevronUpIcon className="h-4 w-4" strokeWidth={2} />
                   </button>
@@ -287,7 +279,7 @@ export function RecipeEditorPage() {
                     type="button"
                     onClick={() => moveStep(index, 1)}
                     className="tap flex h-6 w-6 items-center justify-center text-zinc-400 dark:text-zinc-500"
-                    aria-label="Bajar"
+                    aria-label={t('editor.stepDownAria')}
                   >
                     <ChevronDownIcon className="h-4 w-4" strokeWidth={2} />
                   </button>
@@ -295,7 +287,7 @@ export function RecipeEditorPage() {
                     type="button"
                     onClick={() => removeStep(step.key)}
                     className="tap flex h-6 w-6 items-center justify-center text-zinc-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400"
-                    aria-label="Eliminar"
+                    aria-label={t('common.remove')}
                   >
                     <CloseIcon className="h-3.5 w-3.5" strokeWidth={2} />
                   </button>
@@ -309,21 +301,19 @@ export function RecipeEditorPage() {
             className="tap mt-2 flex items-center gap-1 text-sm font-medium text-brand-600 dark:text-brand-400"
           >
             <PlusIcon className="h-4 w-4" strokeWidth={2.25} />
-            Añadir paso
+            {t('editor.addStep')}
           </button>
         </div>
 
         <div>
-          <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Utensilios necesarios
-          </h2>
+          <h2 className={sectionLabelClass}>{t('editor.toolsHeading')}</h2>
           <div className="space-y-3">
             {TOOL_CATEGORIES.map((category) => {
-              const items = (tools ?? []).filter((t) => t.category === category)
+              const items = (tools ?? []).filter((tool) => tool.category === category)
               if (items.length === 0) return null
               return (
                 <div key={category}>
-                  <p className="mb-1 px-1 text-xs font-medium text-zinc-400 dark:text-zinc-500">{category}</p>
+                  <p className="mb-1 px-1 text-xs font-medium text-zinc-400 dark:text-zinc-500">{toolCategoryLabel(category, t)}</p>
                   <div className="flex flex-wrap gap-2">
                     {items.map((tool) => (
                       <button
@@ -332,7 +322,7 @@ export function RecipeEditorPage() {
                         onClick={() => toggleTool(tool.id)}
                         className={chipClass(toolIds.includes(tool.id))}
                       >
-                        {tool.name}
+                        {toolLabel(tool, t)}
                       </button>
                     ))}
                   </div>
@@ -348,7 +338,7 @@ export function RecipeEditorPage() {
           onClick={handleSave}
           className="tap w-full rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20 disabled:opacity-40 dark:disabled:opacity-30"
         >
-          {isEditing ? 'Guardar cambios' : 'Crear receta'}
+          {isEditing ? t('editor.saveEdit') : t('editor.saveCreate')}
         </button>
       </div>
     </div>
@@ -370,14 +360,15 @@ function IngredientsEditor({
   onUpdateRow: (index: number, patch: Partial<RecipeIngredient>) => void
   onRemoveRow: (index: number) => void
 }) {
+  const { t, language } = useI18n()
   const [search, setSearch] = useState('')
   const [showQuickCreate, setShowQuickCreate] = useState(false)
 
   const filtered = useMemo(() => {
     const needle = search.trim().toLowerCase()
     if (!needle) return []
-    return allIngredients.filter((i) => i.name.toLowerCase().includes(needle)).slice(0, 8)
-  }, [search, allIngredients])
+    return allIngredients.filter((i) => ingredientSearchText(i, language).includes(needle)).slice(0, 8)
+  }, [search, allIngredients, language])
 
   async function handleQuickCreate(ingredient: Ingredient) {
     await db.ingredients.add(ingredient)
@@ -388,9 +379,7 @@ function IngredientsEditor({
 
   return (
     <div>
-      <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-        Ingredientes *
-      </h2>
+      <h2 className={sectionLabelClass}>{t('editor.ingredientsHeading')}</h2>
 
       {rows.length > 0 && (
         <ul className="mb-3 overflow-hidden rounded-2xl bg-white shadow-sm shadow-black/[0.03] dark:bg-zinc-900">
@@ -403,7 +392,9 @@ function IngredientsEditor({
                   index > 0 ? 'border-t border-black/[0.06] dark:border-white/[0.06]' : ''
                 }`}
               >
-                <span className="flex-1 truncate text-sm text-zinc-800 dark:text-zinc-200">{ingredient?.name ?? '…'}</span>
+                <span className="flex-1 truncate text-sm text-zinc-800 dark:text-zinc-200">
+                  {ingredient ? ingredientDisplayName(ingredient, language) : '…'}
+                </span>
                 <input
                   type="number"
                   min={0}
@@ -416,9 +407,9 @@ function IngredientsEditor({
                   onChange={(e) => onUpdateRow(index, { unit: e.target.value as Unit })}
                   className="rounded-lg bg-zinc-100 px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-brand-500 dark:bg-zinc-800 dark:text-zinc-100"
                 >
-                  <option value="g">g</option>
-                  <option value="ml">ml</option>
-                  <option value="unit">ud.</option>
+                  <option value="g">{t('unit.g')}</option>
+                  <option value="ml">{t('unit.ml')}</option>
+                  <option value="unit">{t('unit.unit')}</option>
                 </select>
                 <label className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
                   <input
@@ -427,7 +418,7 @@ function IngredientsEditor({
                     onChange={(e) => onUpdateRow(index, { optional: e.target.checked })}
                     className="h-4 w-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500 dark:border-zinc-600 dark:bg-zinc-800"
                   />
-                  Opc.
+                  {t('editor.optionalShort')}
                 </label>
                 <button
                   type="button"
@@ -445,7 +436,7 @@ function IngredientsEditor({
       <div className="relative">
         <input
           type="text"
-          placeholder="Buscar ingrediente para añadir…"
+          placeholder={t('editor.searchIngredientPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className={fieldClass}
@@ -462,7 +453,7 @@ function IngredientsEditor({
                   }}
                   className="block w-full rounded-xl px-3 py-2 text-left text-sm hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
                 >
-                  {ingredient.name}
+                  {ingredientDisplayName(ingredient, language)}
                   {ingredient.brand && <span className="ml-1 text-zinc-400 dark:text-zinc-500">· {ingredient.brand}</span>}
                 </button>
               </li>
@@ -479,24 +470,24 @@ function IngredientsEditor({
         {showQuickCreate ? (
           <>
             <CloseIcon className="h-4 w-4" strokeWidth={2} />
-            Cancelar
+            {t('common.cancel')}
           </>
         ) : (
           <>
             <PlusIcon className="h-4 w-4" strokeWidth={2.25} />
-            Crear ingrediente nuevo
+            {t('editor.createIngredient')}
           </>
         )}
       </button>
 
-      {showQuickCreate && <QuickCreateIngredient onCreate={handleQuickCreate} />}
+      {showQuickCreate && <QuickCreateIngredient onCreate={handleQuickCreate} t={t} />}
     </div>
   )
 }
 
-function QuickCreateIngredient({ onCreate }: { onCreate: (ingredient: Ingredient) => void }) {
+function QuickCreateIngredient({ onCreate, t }: { onCreate: (ingredient: Ingredient) => void; t: TFunction }) {
   const [name, setName] = useState('')
-  const [category, setCategory] = useState<IngredientCategory>('Otros')
+  const [category, setCategory] = useState<IngredientCategory>('other')
   const [defaultUnit, setDefaultUnit] = useState<Unit>('g')
   const [nutrition, setNutrition] = useState(EMPTY_NUTRITION)
 
@@ -516,32 +507,26 @@ function QuickCreateIngredient({ onCreate }: { onCreate: (ingredient: Ingredient
   return (
     <div className="mt-3 space-y-3 rounded-2xl bg-zinc-100/70 p-3.5 dark:bg-zinc-900/60">
       <label className="block text-sm">
-        <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          Nombre *
-        </span>
+        <span className={sectionLabelClass}>{t('field.name')}</span>
         <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={fieldClass} />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="text-sm">
-          <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Categoría
-          </span>
+          <span className={sectionLabelClass}>{t('field.category')}</span>
           <select value={category} onChange={(e) => setCategory(e.target.value as IngredientCategory)} className={fieldClass}>
             {INGREDIENT_CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {c}
+                {categoryLabel(c, t)}
               </option>
             ))}
           </select>
         </label>
         <label className="text-sm">
-          <span className="mb-1.5 block px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-            Unidad
-          </span>
+          <span className={sectionLabelClass}>{t('field.unit')}</span>
           <select value={defaultUnit} onChange={(e) => setDefaultUnit(e.target.value as Unit)} className={fieldClass}>
-            <option value="g">Gramos</option>
-            <option value="ml">Mililitros</option>
-            <option value="unit">Unidades</option>
+            <option value="g">{t('unitOption.grams')}</option>
+            <option value="ml">{t('unitOption.milliliters')}</option>
+            <option value="unit">{t('unitOption.units')}</option>
           </select>
         </label>
       </div>
@@ -552,7 +537,7 @@ function QuickCreateIngredient({ onCreate }: { onCreate: (ingredient: Ingredient
         onClick={submit}
         className="tap w-full rounded-xl bg-brand-600 py-2.5 font-semibold text-white disabled:opacity-40"
       >
-        Añadir ingrediente a la receta
+        {t('editor.addIngredientToRecipe')}
       </button>
     </div>
   )

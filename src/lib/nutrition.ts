@@ -51,14 +51,20 @@ export function roundNutrition(facts: NutritionFacts): NutritionFacts {
 }
 
 /**
- * Calcula el aporte nutricional total de una receta sumando cada ingrediente
- * (según la cantidad usada) y también el valor por ración.
+ * Calcula el aporte nutricional de una receta a partir de sus ingredientes (cantidades tal
+ * y como están escritas en la receta, que corresponden a `recipe.servings` raciones).
+ *
+ * `perServing` es siempre el valor intensivo (por 1 ración) y no depende de `targetServings`.
+ * `total` es `perServing` escalado a `targetServings` (por defecto, las raciones originales
+ * de la receta) — así, si el usuario pide más raciones en la vista de detalle, el total crece
+ * proporcionalmente y el valor por ración se mantiene constante.
  */
 export function calculateRecipeNutrition(
   recipe: Pick<Recipe, 'ingredients' | 'servings'>,
   ingredientsById: Map<string, Ingredient>,
+  targetServings?: number,
 ): { total: NutritionFacts; perServing: NutritionFacts; missingIngredientIds: string[] } {
-  let total = EMPTY_NUTRITION
+  let rawTotal = EMPTY_NUTRITION
   const missingIngredientIds: string[] = []
 
   for (const recipeIngredient of recipe.ingredients) {
@@ -68,11 +74,13 @@ export function calculateRecipeNutrition(
       continue
     }
     const factor = portionFactor(recipeIngredient.quantity, recipeIngredient.unit)
-    total = addNutrition(total, scaleNutrition(ingredient.nutritionPer100g, factor))
+    rawTotal = addNutrition(rawTotal, scaleNutrition(ingredient.nutritionPer100g, factor))
   }
 
-  const servings = recipe.servings > 0 ? recipe.servings : 1
-  const perServing = scaleNutrition(total, 1 / servings)
+  const baseServings = recipe.servings > 0 ? recipe.servings : 1
+  const perServing = scaleNutrition(rawTotal, 1 / baseServings)
+  const effectiveServings = targetServings && targetServings > 0 ? targetServings : baseServings
+  const total = scaleNutrition(perServing, effectiveServings)
 
   return {
     total: roundNutrition(total),

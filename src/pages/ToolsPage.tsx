@@ -4,9 +4,12 @@ import { db } from '../db/database'
 import { newId } from '../lib/id'
 import { CloseIcon, PlusIcon } from '../components/icons'
 import { Switch } from '../components/Switch'
+import { useI18n } from '../lib/i18n/context'
+import { toolCategoryLabel, toolLabel } from '../lib/i18n/labels'
 import { TOOL_CATEGORIES, type ToolCategory } from '../types'
 
 export function ToolsPage() {
+  const { t } = useI18n()
   const tools = useLiveQuery(() => db.tools.toArray(), [])
   const [newToolName, setNewToolName] = useState('')
 
@@ -35,7 +38,7 @@ export function ToolsPage() {
     await db.tools.add({
       id: newId(),
       name,
-      category: 'Otros utensilios',
+      category: 'other_tools',
       owned: true,
       custom: true,
     })
@@ -49,17 +52,17 @@ export function ToolsPage() {
   return (
     <div className="px-4 pt-2">
       <header className="mb-1">
-        <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Utensilios</h1>
+        <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t('nav.tools')}</h1>
       </header>
       <p className="mb-5 text-sm text-zinc-500 dark:text-zinc-400">
-        {ownedCount} de {tools?.length ?? 0} disponibles · se usan para saber qué recetas puedes cocinar.
+        {t('tools.summary', { owned: ownedCount, total: tools?.length ?? 0 })}
       </p>
 
       <div className="space-y-6">
         {grouped.map(([category, items]) => (
           <section key={category}>
             <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              {category}
+              {toolCategoryLabel(category, t)}
             </h2>
             <ul className="overflow-hidden rounded-2xl bg-white shadow-sm shadow-black/[0.03] dark:bg-zinc-900">
               {items.map((tool, index) => (
@@ -69,18 +72,18 @@ export function ToolsPage() {
                     index > 0 ? 'border-t border-black/[0.06] dark:border-white/[0.06]' : ''
                   }`}
                 >
-                  <span className="text-zinc-800 dark:text-zinc-200">{tool.name}</span>
+                  <span className="text-zinc-800 dark:text-zinc-200">{toolLabel(tool, t)}</span>
                   <div className="flex items-center gap-2">
                     {tool.custom && (
                       <button
                         onClick={() => removeCustomTool(tool.id)}
-                        aria-label="Eliminar"
+                        aria-label={t('common.remove')}
                         className="tap flex h-7 w-7 items-center justify-center rounded-full text-zinc-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400"
                       >
                         <CloseIcon className="h-4 w-4" strokeWidth={2} />
                       </button>
                     )}
-                    <Switch checked={tool.owned} onChange={(owned) => toggleOwned(tool.id, owned)} label={tool.name} />
+                    <Switch checked={tool.owned} onChange={(owned) => toggleOwned(tool.id, owned)} label={toolLabel(tool, t)} />
                   </div>
                 </li>
               ))}
@@ -91,12 +94,12 @@ export function ToolsPage() {
 
       <section className="mt-6 mb-4">
         <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          Añadir otro utensilio
+          {t('tools.addOther')}
         </h2>
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="p.ej. Molde de bizcocho"
+            placeholder={t('tools.addPlaceholder')}
             value={newToolName}
             onChange={(e) => setNewToolName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addCustomTool()}
@@ -105,7 +108,7 @@ export function ToolsPage() {
           <button
             onClick={addCustomTool}
             disabled={!newToolName.trim()}
-            aria-label="Añadir utensilio"
+            aria-label={t('tools.addAria')}
             className="tap flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white disabled:opacity-40"
           >
             <PlusIcon className="h-5 w-5" strokeWidth={2.25} />

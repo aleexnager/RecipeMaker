@@ -4,9 +4,13 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
 import { formatQuantity } from '../../lib/units'
 import { BasketIcon, CloseIcon, MinusIcon, PlusIcon } from '../../components/icons'
-import type { Unit } from '../../types'
+import { useI18n } from '../../lib/i18n/context'
+import { categoryLabel, ingredientDisplayName } from '../../lib/i18n/labels'
+import type { TFunction } from '../../lib/i18n/context'
+import type { IngredientCategory, Unit } from '../../types'
 
 export function PantryPage() {
+  const { t, language } = useI18n()
   const pantryItems = useLiveQuery(() => db.pantryItems.toArray(), [])
   const ingredients = useLiveQuery(() => db.ingredients.toArray(), [])
 
@@ -14,16 +18,16 @@ export function PantryPage() {
 
   const grouped = useMemo(() => {
     if (!pantryItems) return []
-    const byCategory = new Map<string, typeof pantryItems>()
+    const byCategory = new Map<IngredientCategory, typeof pantryItems>()
     for (const item of pantryItems) {
       const ingredient = ingredientsById.get(item.ingredientId)
-      const category = ingredient?.category ?? 'Otros'
+      const category = ingredient?.category ?? 'other'
       const list = byCategory.get(category) ?? []
       list.push(item)
       byCategory.set(category, list)
     }
-    return Array.from(byCategory.entries()).sort((a, b) => a[0].localeCompare(b[0]))
-  }, [pantryItems, ingredientsById])
+    return Array.from(byCategory.entries()).sort((a, b) => categoryLabel(a[0], t).localeCompare(categoryLabel(b[0], t)))
+  }, [pantryItems, ingredientsById, t])
 
   async function updateQuantity(itemId: string, quantity: number) {
     if (quantity <= 0) {
@@ -40,10 +44,10 @@ export function PantryPage() {
   return (
     <div className="px-4 pt-2">
       <header className="mb-5 flex items-center justify-between">
-        <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Despensa</h1>
+        <h1 className="text-[28px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t('nav.pantry')}</h1>
         <Link
           to="/pantry/add"
-          aria-label="Añadir ingrediente"
+          aria-label={t('pantry.addAria')}
           className="tap flex h-9 w-9 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400"
         >
           <PlusIcon className="h-5 w-5" strokeWidth={2} />
@@ -55,15 +59,13 @@ export function PantryPage() {
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-zinc-200/70 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">
             <BasketIcon className="h-8 w-8" strokeWidth={1.5} />
           </div>
-          <p className="mb-1 font-medium text-zinc-700 dark:text-zinc-300">Tu despensa está vacía</p>
-          <p className="mb-4 max-w-[24ch] text-sm text-zinc-500 dark:text-zinc-400">
-            Escanea o añade tu primer ingrediente para empezar.
-          </p>
+          <p className="mb-1 font-medium text-zinc-700 dark:text-zinc-300">{t('pantry.emptyTitle')}</p>
+          <p className="mb-4 max-w-[24ch] text-sm text-zinc-500 dark:text-zinc-400">{t('pantry.emptyHint')}</p>
           <Link
             to="/pantry/add"
             className="tap rounded-full bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white"
           >
-            Añadir ingrediente
+            {t('pantry.emptyCta')}
           </Link>
         </div>
       )}
@@ -72,7 +74,7 @@ export function PantryPage() {
         {grouped.map(([category, items]) => (
           <section key={category}>
             <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              {category}
+              {categoryLabel(category, t)}
             </h2>
             <ul className="overflow-hidden rounded-2xl bg-white shadow-sm shadow-black/[0.03] dark:bg-zinc-900">
               {items.map((item, index) => {
@@ -86,7 +88,7 @@ export function PantryPage() {
                   >
                     <div className="min-w-0">
                       <p className="truncate font-medium text-zinc-800 dark:text-zinc-100">
-                        {ingredient?.name ?? 'Ingrediente eliminado'}
+                        {ingredient ? ingredientDisplayName(ingredient, language) : t('pantry.deletedIngredient')}
                       </p>
                       {ingredient?.brand && <p className="text-xs text-zinc-400 dark:text-zinc-500">{ingredient.brand}</p>}
                     </div>
@@ -94,11 +96,12 @@ export function PantryPage() {
                       <QuantityStepper
                         quantity={item.quantity}
                         unit={item.unit}
+                        t={t}
                         onChange={(q) => updateQuantity(item.id, q)}
                       />
                       <button
                         onClick={() => removeItem(item.id)}
-                        aria-label="Eliminar"
+                        aria-label={t('common.remove')}
                         className="tap flex h-7 w-7 items-center justify-center rounded-full text-zinc-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400"
                       >
                         <CloseIcon className="h-4 w-4" strokeWidth={2} />
@@ -118,10 +121,12 @@ export function PantryPage() {
 function QuantityStepper({
   quantity,
   unit,
+  t,
   onChange,
 }: {
   quantity: number
   unit: Unit
+  t: TFunction
   onChange: (q: number) => void
 }) {
   const step = unit === 'unit' ? 1 : 10
@@ -129,17 +134,17 @@ function QuantityStepper({
     <div className="flex items-center gap-1 rounded-full bg-zinc-100 p-1 dark:bg-zinc-800">
       <button
         onClick={() => onChange(Math.max(0, quantity - step))}
-        aria-label="Restar"
+        aria-label={t('common.subtract')}
         className="tap flex h-6 w-6 items-center justify-center rounded-full bg-white text-zinc-600 shadow-sm dark:bg-zinc-700 dark:text-zinc-200"
       >
         <MinusIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
       </button>
       <span className="min-w-14 text-center text-sm tabular-nums text-zinc-700 dark:text-zinc-300">
-        {formatQuantity(quantity, unit)}
+        {formatQuantity(quantity, unit, t)}
       </span>
       <button
         onClick={() => onChange(quantity + step)}
-        aria-label="Sumar"
+        aria-label={t('common.add')}
         className="tap flex h-6 w-6 items-center justify-center rounded-full bg-white text-zinc-600 shadow-sm dark:bg-zinc-700 dark:text-zinc-200"
       >
         <PlusIcon className="h-3.5 w-3.5" strokeWidth={2.25} />
