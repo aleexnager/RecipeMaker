@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
 import { calculateRecipeNutrition } from '../../lib/nutrition'
-import { matchRecipe } from '../../lib/matching'
+import { buildPantryTotals, matchRecipe } from '../../lib/matching'
 import { NutritionLabel } from '../../components/NutritionLabel'
 import { formatQuantity } from '../../lib/units'
 import { useI18n } from '../../lib/i18n/context'
@@ -43,19 +43,11 @@ export function RecipeDetailPage() {
   const toolsById = useMemo(() => new Map(tools?.map((t) => [t.id, t]) ?? []), [tools])
   const ownedToolIds = useMemo(() => new Set((tools ?? []).filter((t) => t.owned).map((t) => t.id)), [tools])
 
-  const pantryTotals = useMemo(() => {
-    const totals = new Map<string, Map<string, number>>()
-    for (const item of pantryItems ?? []) {
-      const byUnit = totals.get(item.ingredientId) ?? new Map<string, number>()
-      byUnit.set(item.unit, (byUnit.get(item.unit) ?? 0) + item.quantity)
-      totals.set(item.ingredientId, byUnit)
-    }
-    return totals
-  }, [pantryItems])
+  const pantryTotals = useMemo(() => buildPantryTotals(pantryItems ?? [], ingredientsById), [pantryItems, ingredientsById])
 
   const match = useMemo(
-    () => (recipe ? matchRecipe(recipe, pantryTotals, ownedToolIds) : undefined),
-    [recipe, pantryTotals, ownedToolIds],
+    () => (recipe ? matchRecipe(recipe, pantryTotals, ownedToolIds, ingredientsById) : undefined),
+    [recipe, pantryTotals, ownedToolIds, ingredientsById],
   )
 
   const effectiveServings = servingsOverride ?? recipe?.servings ?? 1

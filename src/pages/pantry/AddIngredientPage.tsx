@@ -12,6 +12,9 @@ const BarcodeScanner = lazy(() =>
 )
 import { lookupBarcode } from '../../lib/openFoodFacts'
 import { newId } from '../../lib/id'
+import { isGenericIngredient, suggestGenericIngredient } from '../../lib/ingredientLinks'
+import { useCurrentUser } from '../../lib/currentUser'
+import { addToShoppingList } from '../../lib/shoppingList'
 import { EMPTY_NUTRITION, INGREDIENT_CATEGORIES, type Ingredient, type IngredientCategory, type Unit } from '../../types'
 
 const fieldClass =
@@ -21,9 +24,20 @@ const labelClass = 'mb-1.5 block px-1 text-[13px] font-semibold uppercase tracki
 
 type Mode = 'existing' | 'new'
 
-export function AddIngredientPage() {
+/** Sin selección manual del genérico: se usa la sugerencia automática. */
+const GENERIC_AUTO = 'auto'
+const GENERIC_NONE = ''
+
+/**
+ * Alta de ingredientes, reutilizada para la despensa y para la lista de la compra
+ * (mismo flujo: buscar en el catálogo, escanear o crear uno nuevo).
+ */
+export function AddIngredientPage({ target = 'pantry' }: { target?: 'pantry' | 'shopping' }) {
   const { t, language } = useI18n()
   const navigate = useNavigate()
+  const currentUser = useCurrentUser()
+  const forShopping = target === 'shopping'
+  const returnPath = forShopping ? '/shopping' : '/pantry'
   const ingredients = useLiveQuery(() => db.ingredients.orderBy('name').toArray(), [])
   const [mode, setMode] = useState<Mode>('existing')
   const [search, setSearch] = useState('')
@@ -40,6 +54,22 @@ export function AddIngredientPage() {
   const [category, setCategory] = useState<IngredientCategory>('other')
   const [defaultUnit, setDefaultUnit] = useState<Unit>('g')
   const [nutrition, setNutrition] = useState(EMPTY_NUTRITION)
+  const [genericChoice, setGenericChoice] = useState<string>(GENERIC_AUTO)
+
+  const genericOptions = useMemo(
+    () =>
+      (ingredients ?? [])
+        .filter(isGenericIngredient)
+        .sort((a, b) => ingredientDisplayName(a, language).localeCompare(ingredientDisplayName(b, language))),
+    [ingredients, language],
+  )
+
+  const suggestedGeneric = useMemo(
+    () => (name.trim() && ingredients ? suggestGenericIngredient({ id: '', name, category }, ingredients) : undefined),
+    [name, category, ingredients],
+  )
+
+  const effectiveGenericId = genericChoice === GENERIC_AUTO ? suggestedGeneric?.id : genericChoice || undefined
 
   const filteredIngredients = useMemo(() => {
     if (!ingredients) return []
@@ -67,11 +97,15 @@ export function AddIngredientPage() {
       const result = await lookupBarcode(code, language)
       setMode('new')
       setBarcode(code)
+      setGenericChoice(GENERIC_AUTO)
       if (result.found) {
         setName(result.name ?? '')
         setBrand(result.brand ?? '')
         setCategory(result.category)
         setNutrition(result.nutritionPer100g)
+        // Hereda la unidad del genérico (p.ej. huevos en unidades, no en gramos).
+        const generic = suggestGenericIngredient({ id: '', name: result.name ?? '', category: result.category }, ingredients ?? [])
+        if (generic) setDefaultUnit(generic.defaultUnit)
         setScanStatus(t('addIngredient.scanStatusFound'))
       } else {
         setScanStatus(t('addIngredient.scanStatusNotFound'))
@@ -83,11 +117,26 @@ export function AddIngredientPage() {
     }
   }
 
+  const addedBy = currentUser.name ?? t('shopping.someone')
+
   async function handleAddExisting() {
     if (!selectedIngredient) return
     const qty = Number(quantity)
-    if (!qty || qty <= 0) return
 
+    if (forShopping) {
+      await addToShoppingList({
+        ingredientId: selectedIngredient.id,
+        name: ingredientDisplayName(selectedIngredient, language),
+        quantity: qty > 0 ? qty : undefined,
+        unit: quantityUnit,
+        addedBy,
+        source: 'manual',
+      })
+      navigate(returnPath)
+      return
+    }
+
+    if (!qty || qty <= 0) return
     await db.pantryItems.add({
       id: newId(),
       ingredientId: selectedIngredient.id,
@@ -95,7 +144,7 @@ export function AddIngredientPage() {
       unit: quantityUnit,
       addedAt: Date.now(),
     })
-    navigate('/pantry')
+    navigate(returnPath)
   }
 
   async function handleCreateNew() {
@@ -112,10 +161,20 @@ export function AddIngredientPage() {
       defaultUnit,
       source: barcode ? 'openfoodfacts' : 'manual',
       createdAt: Date.now(),
+      genericId: effectiveGenericId,
     }
     await db.ingredients.add(ingredient)
 
-    if (qty > 0) {
+    if (forShopping) {
+      await addToShoppingList({
+        ingredientId: ingredient.id,
+        name: ingredient.name,
+        quantity: qty > 0 ? qty : undefined,
+        unit: defaultUnit,
+        addedBy,
+        source: 'manual',
+      })
+    } else if (qty > 0) {
       await db.pantryItems.add({
         id: newId(),
         ingredientId: ingredient.id,
@@ -124,7 +183,7 @@ export function AddIngredientPage() {
         addedAt: Date.now(),
       })
     }
-    navigate('/pantry')
+    navigate(returnPath)
   }
 
   return (
@@ -137,7 +196,7 @@ export function AddIngredientPage() {
         >
           <ChevronLeftIcon className="h-5 w-5" strokeWidth={2.25} />
         </button>
-        <h1 className="text-[19px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{t('addIngredient.title')}</h1>
+        <h1 className="text-[19px] font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{forShopping ? t('addIngredient.titleShopping') : t('addIngredient.title')}</h1>
       </header>
 
       <button
@@ -199,7 +258,7 @@ export function AddIngredientPage() {
           {selectedIngredient && (
             <div className="flex items-end gap-2">
               <label className="flex-1 text-sm">
-                <span className={labelClass}>{t('field.quantity')}</span>
+                <span className={labelClass}>{forShopping ? t('addIngredient.quantityOptional') : t('field.quantity')}</span>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -226,11 +285,11 @@ export function AddIngredientPage() {
 
           <button
             type="button"
-            disabled={!selectedIngredient || !Number(quantity)}
+            disabled={!selectedIngredient || (!forShopping && !Number(quantity))}
             onClick={handleAddExisting}
             className="tap w-full rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20 disabled:opacity-40 dark:disabled:opacity-30"
           >
-            {t('addIngredient.addToPantry')}
+            {forShopping ? t('addIngredient.addToShopping') : t('addIngredient.addToPantry')}
           </button>
         </div>
       ) : (
@@ -265,10 +324,30 @@ export function AddIngredientPage() {
             </select>
           </label>
 
+          <label className="block text-sm">
+            <span className={labelClass}>{t('addIngredient.genericLabel')}</span>
+            <select value={genericChoice} onChange={(e) => setGenericChoice(e.target.value)} className={fieldClass}>
+              <option value={GENERIC_AUTO}>
+                {suggestedGeneric
+                  ? t('addIngredient.genericSuggested', { name: ingredientDisplayName(suggestedGeneric, language) })
+                  : t('addIngredient.genericNoSuggestion')}
+              </option>
+              <option value={GENERIC_NONE}>{t('addIngredient.genericNone')}</option>
+              {genericOptions.map((generic) => (
+                <option key={generic.id} value={generic.id}>
+                  {ingredientDisplayName(generic, language)}
+                </option>
+              ))}
+            </select>
+            <span className="mt-1.5 block px-1 text-xs text-zinc-500 dark:text-zinc-400">{t('addIngredient.genericHint')}</span>
+          </label>
+
           <NutritionFieldsEditor value={nutrition} onChange={setNutrition} />
 
           <label className="block text-sm">
-            <span className={labelClass}>{t('addIngredient.quantityNowLabel')}</span>
+            <span className={labelClass}>
+              {forShopping ? t('addIngredient.quantityOptional') : t('addIngredient.quantityNowLabel')} ({unitLabel(defaultUnit, t)})
+            </span>
             <input
               type="number"
               inputMode="decimal"
@@ -285,7 +364,7 @@ export function AddIngredientPage() {
             onClick={handleCreateNew}
             className="tap w-full rounded-2xl bg-brand-600 py-3.5 text-[16px] font-semibold text-white shadow-sm shadow-brand-600/20 disabled:opacity-40 dark:disabled:opacity-30"
           >
-            {t('addIngredient.createButton')}
+            {forShopping ? t('addIngredient.createAndAddToShopping') : t('addIngredient.createButton')}
           </button>
         </div>
       )}

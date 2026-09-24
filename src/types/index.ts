@@ -65,6 +65,14 @@ export interface Ingredient {
   createdAt: number
   /** Presente solo en el catálogo de ejemplo: clave para mostrar el nombre traducido (ver i18n). */
   seedKey?: string
+  /**
+   * Ingrediente genérico al que equivale este producto (p.ej. "Huevos camperos Pazo" → "Huevo").
+   * Las recetas referencian ingredientes genéricos; este vínculo permite que un producto escaneado
+   * cuente como ese ingrediente al comprobar qué recetas se pueden cocinar (ver src/lib/ingredientLinks.ts).
+   */
+  genericId?: string
+  /** Peso medio de una unidad (p.ej. un huevo ≈ 60 g), para convertir entre "ud." y gramos/ml. */
+  gramsPerUnit?: number
 }
 
 /** Una unidad de ingrediente que el usuario tiene físicamente en su despensa. */
@@ -73,6 +81,23 @@ export interface PantryItem {
   ingredientId: string
   quantity: number
   unit: Unit
+  addedAt: number
+}
+
+/** Un elemento de la lista de la compra, compartida por quienes usan la app. */
+export interface ShoppingItem {
+  id: string
+  /** Ingrediente del catálogo, si lo hay. */
+  ingredientId?: string
+  /** Nombre a mostrar si no hay ingrediente de catálogo asociado. */
+  name: string
+  quantity?: number
+  unit?: Unit
+  checked: boolean
+  /** Nombre de quien lo añadió (usuario autenticado o nombre elegido en el dispositivo). */
+  addedBy: string
+  /** 'auto': añadido automáticamente al agotarse en la despensa. */
+  source: 'manual' | 'auto'
   addedAt: number
 }
 

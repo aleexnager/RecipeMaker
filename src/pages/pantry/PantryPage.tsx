@@ -3,14 +3,17 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
 import { formatQuantity } from '../../lib/units'
-import { BasketIcon, CloseIcon, MinusIcon, PlusIcon } from '../../components/icons'
+import { BasketIcon, CartIcon, CloseIcon, MinusIcon, PlusIcon } from '../../components/icons'
 import { useI18n } from '../../lib/i18n/context'
 import { categoryLabel, ingredientDisplayName } from '../../lib/i18n/labels'
 import type { TFunction } from '../../lib/i18n/context'
-import type { IngredientCategory, Unit } from '../../types'
+import type { IngredientCategory, PantryItem, Unit } from '../../types'
+import { useCurrentUser } from '../../lib/currentUser'
+import { addDepletedToShoppingList, addToShoppingList } from '../../lib/shoppingList'
 
 export function PantryPage() {
   const { t, language } = useI18n()
+  const currentUser = useCurrentUser()
   const pantryItems = useLiveQuery(() => db.pantryItems.toArray(), [])
   const ingredients = useLiveQuery(() => db.ingredients.toArray(), [])
 
@@ -29,12 +32,25 @@ export function PantryPage() {
     return Array.from(byCategory.entries()).sort((a, b) => categoryLabel(a[0], t).localeCompare(categoryLabel(b[0], t)))
   }, [pantryItems, ingredientsById, t])
 
-  async function updateQuantity(itemId: string, quantity: number) {
+  const addedBy = currentUser.name ?? t('shopping.someone')
+
+  function itemName(item: PantryItem): string {
+    const ingredient = ingredientsById.get(item.ingredientId)
+    return ingredient ? ingredientDisplayName(ingredient, language) : t('pantry.deletedIngredient')
+  }
+
+  /** Al llegar a 0 se considera agotado: se quita de la despensa y se apunta en la lista de la compra. */
+  async function updateQuantity(item: PantryItem, quantity: number) {
     if (quantity <= 0) {
-      await db.pantryItems.delete(itemId)
+      await db.pantryItems.delete(item.id)
+      await addDepletedToShoppingList(item.ingredientId, itemName(item), addedBy)
     } else {
-      await db.pantryItems.update(itemId, { quantity })
+      await db.pantryItems.update(item.id, { quantity })
     }
+  }
+
+  async function addToList(item: PantryItem) {
+    await addToShoppingList({ ingredientId: item.ingredientId, name: itemName(item), addedBy, source: 'manual' })
   }
 
   async function removeItem(itemId: string) {
@@ -79,6 +95,7 @@ export function PantryPage() {
             <ul className="overflow-hidden rounded-2xl bg-white shadow-sm shadow-black/[0.03] dark:bg-zinc-900">
               {items.map((item, index) => {
                 const ingredient = ingredientsById.get(item.ingredientId)
+                const generic = ingredient?.genericId ? ingredientsById.get(ingredient.genericId) : undefined
                 return (
                   <li
                     key={item.id}
@@ -90,15 +107,29 @@ export function PantryPage() {
                       <p className="truncate font-medium text-zinc-800 dark:text-zinc-100">
                         {ingredient ? ingredientDisplayName(ingredient, language) : t('pantry.deletedIngredient')}
                       </p>
-                      {ingredient?.brand && <p className="text-xs text-zinc-400 dark:text-zinc-500">{ingredient.brand}</p>}
+                      {(ingredient?.brand || generic) && (
+                        <p className="truncate text-xs text-zinc-400 dark:text-zinc-500">
+                          {[ingredient?.brand, generic && t('pantry.countsAs', { name: ingredientDisplayName(generic, language) })]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </p>
+                      )}
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       <QuantityStepper
                         quantity={item.quantity}
                         unit={item.unit}
                         t={t}
-                        onChange={(q) => updateQuantity(item.id, q)}
+                        onChange={(q) => updateQuantity(item, q)}
                       />
+                      <button
+                        onClick={() => addToList(item)}
+                        aria-label={t('pantry.addToShoppingAria')}
+                        title={t('pantry.addToShoppingAria')}
+                        className="tap flex h-7 w-7 items-center justify-center rounded-full text-zinc-400 hover:text-brand-600 dark:text-zinc-500 dark:hover:text-brand-400"
+                      >
+                        <CartIcon className="h-4 w-4" strokeWidth={2} />
+                      </button>
                       <button
                         onClick={() => removeItem(item.id)}
                         aria-label={t('common.remove')}

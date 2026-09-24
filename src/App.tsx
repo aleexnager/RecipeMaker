@@ -9,14 +9,15 @@ import { RecipeDetailPage } from './pages/recipes/RecipeDetailPage'
 import { RecipeEditorPage } from './pages/recipes/RecipeEditorPage'
 import { ensureSeeded } from './db/seed'
 import { runMigrations } from './db/migrations'
+import { verifySession } from './lib/currentUser'
+import { ShoppingListPage } from './pages/shopping/ShoppingListPage'
 
 function App() {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    ensureSeeded()
-      .then(() => runMigrations())
-      .finally(() => setReady(true))
+    const prepareData = ensureSeeded().then(() => runMigrations())
+    Promise.allSettled([prepareData, verifySession()]).then(() => setReady(true))
   }, [])
 
   if (!ready) {
@@ -37,6 +38,8 @@ function App() {
         <Route path="/recipes/:id/edit" element={<RecipeEditorPage />} />
         <Route path="/pantry" element={<PantryPage />} />
         <Route path="/pantry/add" element={<AddIngredientPage />} />
+        <Route path="/shopping" element={<ShoppingListPage />} />
+        <Route path="/shopping/add" element={<AddIngredientPage target="shopping" />} />
         <Route path="/tools" element={<ToolsPage />} />
         <Route path="*" element={<Navigate to="/recipes" replace />} />
       </Routes>

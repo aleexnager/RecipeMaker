@@ -203,3 +203,22 @@ export function MonitorIcon(props: IconProps) {
     </Icon>
   )
 }
+
+export function CartIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M2.5 3.5h2.2l2.1 11.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.46-1.15L20 7.5H5.6" />
+      <circle cx="9" cy="19.75" r="1.25" />
+      <circle cx="17" cy="19.75" r="1.25" />
+    </Icon>
+  )
+}
+
+export function LogoutIcon(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <path d="M14 4.5h3.5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H14" />
+      <path d="M10 8l-4 4 4 4M6 12h9" />
+    </Icon>
+  )
+}

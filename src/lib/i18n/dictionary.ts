@@ -9,6 +9,7 @@ const es: Dictionary = {
   'nav.recipes': 'Recetas',
   'nav.pantry': 'Despensa',
   'nav.tools': 'Utensilios',
+  'nav.shopping': 'Compra',
 
   // Genérico
   'common.remove': 'Eliminar',
@@ -74,12 +75,37 @@ const es: Dictionary = {
   'tools.addPlaceholder': 'p.ej. Molde de bizcocho',
   'tools.addAria': 'Añadir utensilio',
 
+  // Lista de la compra
+  'shopping.title': 'Lista de la compra',
+  'shopping.addAria': 'Añadir a la lista',
+  'shopping.quickAddPlaceholder': 'Añadir rápido, p.ej. papel de cocina',
+  'shopping.emptyTitle': 'No falta nada',
+  'shopping.emptyHint': 'Añade lo que necesites. Lo que se agote en la despensa se apuntará aquí solo.',
+  'shopping.pending': ({ count }) => `Por comprar (${count})`,
+  'shopping.bought': 'Comprado',
+  'shopping.clearBought': 'Borrar comprados',
+  'shopping.markBought': 'Marcar como comprado',
+  'shopping.markPending': 'Marcar como pendiente',
+  'shopping.addedBy': ({ name }) => `Añadido por ${name}`,
+  'shopping.autoBadge': 'Se agotó',
+  'shopping.someone': 'Alguien',
+  'shopping.namePromptTitle': '¿Cómo te llamas?',
+  'shopping.namePromptHint': 'Tu nombre aparecerá junto a lo que añadas a la lista.',
+  'shopping.namePlaceholder': 'Tu nombre',
+  'shopping.nameSave': 'Guardar',
+
+  // Sesión
+  'auth.logout': 'Cerrar sesión',
+  'auth.signedInAs': ({ name }) => `Sesión de ${name}`,
+
   // Despensa
   'pantry.addAria': 'Añadir ingrediente',
   'pantry.emptyTitle': 'Tu despensa está vacía',
   'pantry.emptyHint': 'Escanea o añade tu primer ingrediente para empezar.',
   'pantry.emptyCta': 'Añadir ingrediente',
   'pantry.deletedIngredient': 'Ingrediente eliminado',
+  'pantry.countsAs': ({ name }) => `cuenta como ${name}`,
+  'pantry.addToShoppingAria': 'Añadir a la lista de la compra',
 
   // Añadir ingrediente
   'addIngredient.title': 'Añadir a la despensa',
@@ -97,6 +123,15 @@ const es: Dictionary = {
   'addIngredient.defaultUnitLabel': 'Unidad habitual de medida',
   'addIngredient.quantityNowLabel': 'Cantidad que tienes ahora (opcional)',
   'addIngredient.createButton': 'Crear ingrediente',
+  'addIngredient.titleShopping': 'Añadir a la lista de la compra',
+  'addIngredient.addToShopping': 'Añadir a la lista',
+  'addIngredient.createAndAddToShopping': 'Crear y añadir a la lista',
+  'addIngredient.quantityOptional': 'Cantidad (opcional)',
+  'addIngredient.genericLabel': 'Cuenta como (para recetas)',
+  'addIngredient.genericSuggested': ({ name }) => `${name} (sugerido)`,
+  'addIngredient.genericNoSuggestion': 'Sin sugerencia: elige uno si aplica',
+  'addIngredient.genericNone': 'Ninguno: es un ingrediente propio',
+  'addIngredient.genericHint': 'Las recetas usan ingredientes genéricos. Vincula el producto (p.ej. una marca de huevos → Huevo) para que cuente al ver qué puedes cocinar.',
 
   // Recetas (listado)
   'recipes.newAria': 'Nueva receta',
@@ -230,6 +265,7 @@ const en: Dictionary = {
   'nav.recipes': 'Recipes',
   'nav.pantry': 'Pantry',
   'nav.tools': 'Tools',
+  'nav.shopping': 'Shopping',
 
   'common.remove': 'Remove',
   'common.subtract': 'Subtract',
@@ -286,11 +322,35 @@ const en: Dictionary = {
   'tools.addPlaceholder': 'e.g. Baking pan',
   'tools.addAria': 'Add tool',
 
+  // Shopping list
+  'shopping.title': 'Shopping list',
+  'shopping.addAria': 'Add to list',
+  'shopping.quickAddPlaceholder': 'Quick add, e.g. paper towels',
+  'shopping.emptyTitle': 'Nothing missing',
+  'shopping.emptyHint': 'Add whatever you need. Anything that runs out in the pantry is added here automatically.',
+  'shopping.pending': ({ count }) => `To buy (${count})`,
+  'shopping.bought': 'Bought',
+  'shopping.clearBought': 'Clear bought',
+  'shopping.markBought': 'Mark as bought',
+  'shopping.markPending': 'Mark as pending',
+  'shopping.addedBy': ({ name }) => `Added by ${name}`,
+  'shopping.autoBadge': 'Ran out',
+  'shopping.someone': 'Someone',
+  'shopping.namePromptTitle': "What's your name?",
+  'shopping.namePromptHint': 'Your name will appear next to what you add to the list.',
+  'shopping.namePlaceholder': 'Your name',
+  'shopping.nameSave': 'Save',
+
+  'auth.logout': 'Sign out',
+  'auth.signedInAs': ({ name }) => `Signed in as ${name}`,
+
   'pantry.addAria': 'Add ingredient',
   'pantry.emptyTitle': 'Your pantry is empty',
   'pantry.emptyHint': 'Scan or add your first ingredient to get started.',
   'pantry.emptyCta': 'Add ingredient',
   'pantry.deletedIngredient': 'Deleted ingredient',
+  'pantry.countsAs': ({ name }) => `counts as ${name}`,
+  'pantry.addToShoppingAria': 'Add to shopping list',
 
   'addIngredient.title': 'Add to pantry',
   'addIngredient.scanButton': 'Scan barcode',
@@ -307,6 +367,15 @@ const en: Dictionary = {
   'addIngredient.defaultUnitLabel': 'Usual unit of measure',
   'addIngredient.quantityNowLabel': 'How much you have now (optional)',
   'addIngredient.createButton': 'Create ingredient',
+  'addIngredient.titleShopping': 'Add to shopping list',
+  'addIngredient.addToShopping': 'Add to list',
+  'addIngredient.createAndAddToShopping': 'Create and add to list',
+  'addIngredient.quantityOptional': 'Quantity (optional)',
+  'addIngredient.genericLabel': 'Counts as (for recipes)',
+  'addIngredient.genericSuggested': ({ name }) => `${name} (suggested)`,
+  'addIngredient.genericNoSuggestion': 'No suggestion: pick one if it applies',
+  'addIngredient.genericNone': 'None: it is its own ingredient',
+  'addIngredient.genericHint': 'Recipes use generic ingredients. Link the product (e.g. a brand of eggs → Egg) so it counts when checking what you can cook.',
 
   'recipes.newAria': 'New recipe',
   'recipes.searchPlaceholder': 'Search recipe…',

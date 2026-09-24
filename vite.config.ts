@@ -25,6 +25,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,ico}'],
+        // Login/logout/sesión los resuelve el servidor (middleware.ts): nunca servirlos desde la caché.
+        navigateFallbackDenylist: [/^\/auth\//],
       },
     }),
   ],

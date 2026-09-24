@@ -1,5 +1,6 @@
-import type { PantryItem, Recipe } from '../types'
+import type { Ingredient, PantryItem, Recipe, Unit } from '../types'
 import { totalTimeMinutes } from '../types'
+import { canonicalIngredientId, convertQuantity, gramsPerUnitOf } from './ingredientLinks'
 import { recipeDisplayName } from './i18n/labels'
 import type { Language } from './i18n/types'
 
@@ -12,33 +13,56 @@ export interface RecipeMatch {
   totalTimeMinutes: number
 }
 
-/** Suma, por ingrediente, la cantidad disponible en despensa agrupada por unidad. */
-function buildPantryTotals(pantryItems: PantryItem[]): Map<string, Map<string, number>> {
-  const totals = new Map<string, Map<string, number>>()
+interface PantryStock {
+  quantity: number
+  unit: Unit
+  gramsPerUnit?: number
+}
+
+/** Existencias de la despensa agrupadas por ingrediente canónico (un producto cuenta como su genérico). */
+export type PantryTotals = Map<string, PantryStock[]>
+
+export function buildPantryTotals(pantryItems: PantryItem[], ingredientsById: Map<string, Ingredient>): PantryTotals {
+  const totals: PantryTotals = new Map()
   for (const item of pantryItems) {
-    const byUnit = totals.get(item.ingredientId) ?? new Map<string, number>()
-    byUnit.set(item.unit, (byUnit.get(item.unit) ?? 0) + item.quantity)
-    totals.set(item.ingredientId, byUnit)
+    if (item.quantity <= 0) continue
+    const key = canonicalIngredientId(item.ingredientId, ingredientsById)
+    const list = totals.get(key) ?? []
+    list.push({ quantity: item.quantity, unit: item.unit, gramsPerUnit: gramsPerUnitOf(item.ingredientId, ingredientsById) })
+    totals.set(key, list)
   }
   return totals
 }
 
 export function matchRecipe(
   recipe: Recipe,
-  pantryTotals: Map<string, Map<string, number>>,
+  pantryTotals: PantryTotals,
   ownedToolIds: Set<string>,
+  ingredientsById: Map<string, Ingredient>,
 ): RecipeMatch {
   const missingIngredientIds: string[] = []
   const insufficientIngredientIds: string[] = []
 
   for (const recipeIngredient of recipe.ingredients) {
     if (recipeIngredient.optional) continue
-    const byUnit = pantryTotals.get(recipeIngredient.ingredientId)
-    const available = byUnit?.get(recipeIngredient.unit) ?? 0
-
-    if (!byUnit || available <= 0) {
+    const stock = pantryTotals.get(canonicalIngredientId(recipeIngredient.ingredientId, ingredientsById))
+    if (!stock?.length) {
       missingIngredientIds.push(recipeIngredient.ingredientId)
-    } else if (available < recipeIngredient.quantity) {
+      continue
+    }
+
+    const recipeGramsPerUnit = gramsPerUnitOf(recipeIngredient.ingredientId, ingredientsById)
+    let available = 0
+    let comparable = false
+    for (const entry of stock) {
+      const converted = convertQuantity(entry.quantity, entry.unit, recipeIngredient.unit, entry.gramsPerUnit ?? recipeGramsPerUnit)
+      if (converted === undefined) continue
+      available += converted
+      comparable = true
+    }
+    // Si hay existencias pero en una unidad no convertible (p.ej. "ud." sin peso medio), se da por
+    // disponible: sabemos que lo tienes aunque no podamos comprobar si llega.
+    if (comparable && available < recipeIngredient.quantity) {
       insufficientIngredientIds.push(recipeIngredient.ingredientId)
     }
   }
@@ -68,11 +92,12 @@ export interface RecipeFilters {
 export function matchAndFilterRecipes(
   recipes: Recipe[],
   pantryItems: PantryItem[],
+  ingredientsById: Map<string, Ingredient>,
   ownedToolIds: Set<string>,
   filters: RecipeFilters,
 ): RecipeMatch[] {
-  const pantryTotals = buildPantryTotals(pantryItems)
-  let matches = recipes.map((recipe) => matchRecipe(recipe, pantryTotals, ownedToolIds))
+  const pantryTotals = buildPantryTotals(pantryItems, ingredientsById)
+  let matches = recipes.map((recipe) => matchRecipe(recipe, pantryTotals, ownedToolIds, ingredientsById))
 
   if (filters.maxTotalTimeMinutes !== undefined) {
     matches = matches.filter((m) => m.totalTimeMinutes <= filters.maxTotalTimeMinutes!)

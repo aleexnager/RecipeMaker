@@ -16,6 +16,7 @@ export function RecipesPage() {
   const recipes = useLiveQuery(() => db.recipes.toArray(), [])
   const pantryItems = useLiveQuery(() => db.pantryItems.toArray(), [])
   const tools = useLiveQuery(() => db.tools.toArray(), [])
+  const ingredients = useLiveQuery(() => db.ingredients.toArray(), [])
 
   const [search, setSearch] = useState('')
   const [maxTime, setMaxTime] = useState<number | undefined>(undefined)
@@ -28,9 +29,11 @@ export function RecipesPage() {
     [tools],
   )
 
+  const ingredientsById = useMemo(() => new Map(ingredients?.map((i) => [i.id, i]) ?? []), [ingredients])
+
   const matches = useMemo(() => {
-    if (!recipes || !pantryItems) return []
-    return matchAndFilterRecipes(recipes, pantryItems, ownedToolIds, {
+    if (!recipes || !pantryItems || !ingredients) return []
+    return matchAndFilterRecipes(recipes, pantryItems, ingredientsById, ownedToolIds, {
       maxTotalTimeMinutes: maxTime,
       onlyMakeableNow,
       requireOwnedTools,
@@ -38,7 +41,7 @@ export function RecipesPage() {
       searchText: search,
       language,
     })
-  }, [recipes, pantryItems, ownedToolIds, maxTime, onlyMakeableNow, requireOwnedTools, activeCategories, search, language])
+  }, [recipes, pantryItems, ingredients, ingredientsById, ownedToolIds, maxTime, onlyMakeableNow, requireOwnedTools, activeCategories, search, language])
 
   function toggleCategory(category: RecipeCategoryTag) {
     setActiveCategories((prev) =>
@@ -151,9 +154,11 @@ function RecipeCard({ match }: { match: RecipeMatch }) {
               {t('recipes.canMakeNow')}
             </span>
           ) : (
+            missingCount > 0 && (
             <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
               {t('recipes.missingIngredients', { count: missingCount })}
             </span>
+            )
           )}
           {match.missingToolIds.length > 0 && (
             <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">

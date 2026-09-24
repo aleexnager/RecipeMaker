@@ -1,4 +1,5 @@
 import { db } from './database'
+import { isGenericIngredient, suggestGenericIngredient } from '../lib/ingredientLinks'
 import type { IngredientCategory, KitchenTool, RecipeCategoryTag, ToolCategory } from '../types'
 
 const OLD_INGREDIENT_CATEGORY_MAP: Record<string, IngredientCategory> = {
@@ -102,6 +103,11 @@ const OLD_RECIPE_SEEDKEY_MAP: Record<string, string> = {
  * Idempotente y guardada por una entrada en `meta`, igual que el sembrado inicial.
  */
 export async function runMigrations(): Promise<void> {
+  await migrateI18n()
+  await linkProductsToGenerics()
+}
+
+async function migrateI18n(): Promise<void> {
   await db.transaction('rw', db.meta, db.tools, db.ingredients, db.recipes, async () => {
     const alreadyMigrated = await db.meta.get('migrated_i18n_v1')
     if (alreadyMigrated) return
@@ -179,5 +185,39 @@ export async function runMigrations(): Promise<void> {
     }
 
     await db.meta.put({ key: 'migrated_i18n_v1', value: true })
+  })
+}
+
+/**
+ * Vincula los productos ya guardados (escaneados o con marca) a su ingrediente genérico, para que
+ * cuenten en las recetas. Además repara un efecto del error original: al crear un producto nuevo la
+ * cantidad se guardaba en la unidad por defecto "g", así que "12 huevos" quedaba como "12 g".
+ * Para huevos, cantidades pequeñas en gramos se reinterpretan como unidades.
+ */
+async function linkProductsToGenerics(): Promise<void> {
+  await db.transaction('rw', db.meta, db.ingredients, db.pantryItems, async () => {
+    const alreadyMigrated = await db.meta.get('linked_generics_v1')
+    if (alreadyMigrated) return
+
+    const catalog = await db.ingredients.toArray()
+    for (const ingredient of catalog) {
+      if (ingredient.genericId || isGenericIngredient(ingredient)) continue
+      const generic = suggestGenericIngredient(ingredient, catalog)
+      if (!generic) continue
+
+      const patch: { genericId: string; defaultUnit?: typeof ingredient.defaultUnit } = { genericId: generic.id }
+      const countsInUnits = generic.defaultUnit === 'unit' && ingredient.category === 'eggs'
+      if (countsInUnits && ingredient.defaultUnit !== 'unit') patch.defaultUnit = 'unit'
+      await db.ingredients.update(ingredient.id, patch)
+
+      if (countsInUnits) {
+        const items = await db.pantryItems.where('ingredientId').equals(ingredient.id).toArray()
+        for (const item of items) {
+          if (item.unit === 'g' && item.quantity <= 36) await db.pantryItems.update(item.id, { unit: 'unit' })
+        }
+      }
+    }
+
+    await db.meta.put({ key: 'linked_generics_v1', value: true })
   })
 }
